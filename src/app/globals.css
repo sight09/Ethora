@@ -1,27 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;500;600;700&family=Public+Sans:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #08090E;
+  --foreground: #F1F5F9;
+  --font-public-sans: 'Public Sans', system-ui, -apple-system, sans-serif;
+  --font-fraunces: 'Fraunces', Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: var(--font-public-sans);
+  selection-background-color: #8B5CF6;
+  selection-color: #ffffff;
+}
+
+/* Custom esports scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0E17;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #232A42;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3A456B;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* MInT Specification: Fraunces (serif) appears only in three places:
+     the header wordmark, hero headlines, and article/publication titles. */
+  .font-mint-serif {
+    font-family: var(--font-fraunces), Georgia, serif;
+  }
+
+  .font-mint-sans {
+    font-family: var(--font-public-sans), system-ui, -apple-system, sans-serif;
+  }
+
+  .text-gradient-violet {
+    background: linear-gradient(135deg, #FFFFFF 0%, #C4B5FD 50%, #8B5CF6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #FFFFFF 0%, #FDE68A 50%, #F59E0B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-cyan {
+    background: linear-gradient(135deg, #FFFFFF 0%, #A5F3FC 50%, #06B6D4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ethora-glass {
+    background: rgba(14, 17, 26, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .ethora-card-interactive {
+    background: #0E111A;
+    border: 1px solid #232A42;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ethora-card-interactive:hover {
+    border-color: #3A456B;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(139, 92, 246, 0.15);
+  }
+
+  .ethiopia-flag-stripe {
+    background: linear-gradient(90deg, #10B981 33.3%, #F59E0B 33.3% 66.6%, #EF4444 66.6%);
+  }
+
+  .cyber-grid-pattern {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
 }

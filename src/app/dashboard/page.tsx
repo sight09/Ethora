@@ -1,0 +1,1118 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import {
+  Trophy,
+  Swords,
+  ShieldCheck,
+  Flame,
+  Award,
+  Calendar,
+  MapPin,
+  TrendingUp,
+  Gamepad2,
+  Plus,
+  ArrowRight,
+  ExternalLink,
+  ChevronRight,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  Layers,
+  Activity,
+  AlertCircle,
+  Zap,
+  Crosshair,
+  Target,
+  BarChart3,
+  PieChart,
+  Crown,
+  Share2,
+  Filter,
+} from "lucide-react";
+import { useEthora } from "@/context/EthoraContext";
+import { formatETB, formatNumber, getRankTier } from "@/lib/utils";
+import { SUPPORTED_GAMES } from "@/data/games";
+
+export default function GamerDashboardPage() {
+  const { currentUser, tournaments, connectGameAccount } = useEthora();
+  const [connectModalOpen, setConnectModalOpen] = useState(false);
+  const [selectedGameId, setSelectedGameId] = useState("game-eafc");
+  const [inGameName, setInGameName] = useState("");
+  const [platformId, setPlatformId] = useState("");
+
+  // Interactive controls
+  const [chartPeriod, setChartPeriod] = useState<"7d" | "30d" | "season">("7d");
+  const [activeGameTab, setActiveGameTab] = useState<string>("game-valorant");
+  const [matchFilter, setMatchFilter] = useState<"all" | "win" | "loss">("all");
+  const [hoveredChartPoint, setHoveredChartPoint] = useState<number | null>(null);
+  const [copiedId, setCopiedId] = useState(false);
+
+  if (!currentUser) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+        <h2 className="text-2xl font-bold text-white font-sans">No Gamer Profile Active</h2>
+        <p className="text-slate-400 text-sm mt-2 font-sans">
+          Switch to a gamer persona using the role switcher at the bottom of the sidebar, or create an account.
+        </p>
+        <Link
+          href="/auth/signup"
+          className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 text-white font-medium text-sm"
+        >
+          Create Gamer Profile
+        </Link>
+      </div>
+    );
+  }
+
+  const rankInfo = getRankTier(currentUser.ratingPoints);
+
+  // Filter tournaments user is registered for
+  const userRegisteredTournaments = tournaments.filter((t) =>
+    t.registrations.some((r) => r.gamerId === currentUser.id)
+  );
+
+  // Recommendations: tournaments matching user's games and location
+  const userGameIds = currentUser.connectedGames.map((g) => g.gameId);
+  const recommendedTournaments = tournaments.filter(
+    (t) =>
+      userGameIds.includes(t.gameId) &&
+      !t.registrations.some((r) => r.gamerId === currentUser.id) &&
+      t.status !== "completed"
+  );
+
+  const handleConnectGame = (e: React.FormEvent) => {
+    e.preventDefault();
+    const game = SUPPORTED_GAMES.find((g) => g.id === selectedGameId);
+    if (!game) return;
+    connectGameAccount(
+      currentUser.id,
+      game.id,
+      game.name,
+      inGameName,
+      game.platforms[0] as any,
+      platformId
+    );
+    setConnectModalOpen(false);
+    setInGameName("");
+    setPlatformId("");
+  };
+
+  const handleCopyId = () => {
+    navigator.clipboard?.writeText(currentUser.ethoraId);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
+
+  // Selected game for the Interactive Game Studio
+  const activeGame =
+    currentUser.connectedGames.find((g) => g.gameId === activeGameTab) ||
+    currentUser.connectedGames[0];
+
+  // Rating Progression Dataset for SVG Velocity Area Chart
+  const chartData = [
+    { label: "M1", rating: 2680, change: "+35", opponent: "Dire Dawa Titans", map: "Ascent" },
+    { label: "M2", rating: 2710, change: "+30", opponent: "Bole Phoenix", map: "Bind" },
+    { label: "M3", rating: 2695, change: "-15", opponent: "Great Rift Org", map: "Haven" },
+    { label: "M4", rating: 2740, change: "+45", opponent: "Hawassa Vipers", map: "Split" },
+    { label: "M5", rating: 2780, change: "+40", opponent: "Sheger United", map: "Lotus" },
+    { label: "M6", rating: 2815, change: "+35", opponent: "Arada Strikers", map: "Sunset" },
+    { label: "M7", rating: 2840, change: "+25", opponent: "Lion City Prime", map: "Breeze" },
+  ];
+
+  // SVG Chart calculation helpers
+  const minRating = 2650;
+  const maxRating = 2900;
+  const chartHeight = 130;
+  const chartWidth = 520;
+  const getX = (index: number) => (index / (chartData.length - 1)) * (chartWidth - 40) + 20;
+  const getY = (rating: number) =>
+    chartHeight - 15 - ((rating - minRating) / (maxRating - minRating)) * (chartHeight - 35);
+
+  const pointsString = chartData
+    .map((d, i) => `${getX(i)},${getY(d.rating)}`)
+    .join(" ");
+
+  const areaString = `${getX(0)},${chartHeight} ${pointsString} ${getX(
+    chartData.length - 1
+  )},${chartHeight}`;
+
+  // Filtered Match History
+  const filteredMatches = currentUser.matchHistory.filter((m) => {
+    if (matchFilter === "win") return m.result === "win";
+    if (matchFilter === "loss") return m.result === "loss";
+    return true;
+  });
+
+  return (
+    <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+      {/* =========================================================================
+          1. HERO PASSPORT & TIER PROMOTION COMMAND (Asymmetrical, Dynamic, Rich)
+          ========================================================================= */}
+      <div className="relative rounded-3xl border border-[#232A42] bg-gradient-to-br from-[#0E111A] via-[#141826] to-[#0A0D15] p-6 lg:p-8 overflow-hidden shadow-2xl">
+        {/* Ambient atmospheric glow */}
+        <div className="absolute top-0 right-1/4 w-[500px] h-64 bg-violet-600/15 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-8">
+          {/* Athlete Portrait & Identity */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+            <div className="relative shrink-0">
+              {/* Outer Glowing Tier Frame */}
+              <div className="relative p-1 rounded-2xl bg-gradient-to-tr from-violet-600 via-cyan-400 to-amber-400 shadow-glow-violet">
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.gamerTag}
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover"
+                />
+              </div>
+
+              {currentUser.verified && (
+                <div
+                  className="absolute -bottom-1 -right-1 p-1 rounded-full bg-emerald-500 text-white shadow-lg border-2 border-[#0A0D15]"
+                  title="Verified Ethiopian Esports Athlete"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="font-sans font-semibold text-[24px] sm:text-[28px] text-white tracking-tight leading-none">
+                  {currentUser.gamerTag}
+                </h1>
+
+                {/* Interactive Copyable Ethora Passport ID Chip */}
+                <button
+                  onClick={handleCopyId}
+                  className="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-medium bg-violet-950/80 hover:bg-violet-900 text-violet-300 border border-violet-600/40 transition flex items-center gap-1.5"
+                  title="Click to copy Passport ID"
+                >
+                  <span>{currentUser.ethoraId}</span>
+                  <span className="text-[10px] text-violet-400 opacity-70">
+                    {copiedId ? "✓ Copied" : "Copy"}
+                  </span>
+                </button>
+
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Verified Athlete
+                </span>
+              </div>
+
+              <p className="text-[14px] font-normal text-slate-300">{currentUser.realName}</p>
+
+              <div className="flex items-center gap-3 text-[13px] font-normal text-slate-400 pt-1 flex-wrap">
+                <span className="flex items-center gap-1.5 text-slate-300">
+                  <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+                  {currentUser.location.communityName} • {currentUser.location.woredaName},{" "}
+                  {currentUser.location.regionName}
+                </span>
+                <span className="inline-block w-4 h-2 rounded-sm ethiopia-flag-stripe" />
+                {currentUser.team && (
+                  <span className="flex items-center gap-1.5 text-violet-300 font-medium">
+                    <Layers className="w-3.5 h-3.5 text-violet-400" />
+                    {currentUser.team.name} ({currentUser.team.role})
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Center/Right: Interactive ELO Ladder & Standing Pod */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            {/* ELO Tier Progression Meter */}
+            <div className="p-4 rounded-2xl border border-[#232A42] bg-[#0A0D15]/80 backdrop-blur-md min-w-[260px] space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
+                  <span className="text-[12px] font-semibold text-white uppercase tracking-wider">
+                    {rankInfo.tier}
+                  </span>
+                </div>
+                <span className="text-[11px] font-medium text-emerald-400">Top 0.8%</span>
+              </div>
+
+              {/* Segmented Progress Track */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-violet-300 font-bold">{currentUser.ratingPoints} MMR</span>
+                  <span className="text-slate-400">Next: 3,000 MMR</span>
+                </div>
+                <div className="h-2 w-full bg-[#141826] rounded-full overflow-hidden p-0.5 border border-[#232A42]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-violet-600 via-cyan-400 to-emerald-400 transition-all duration-1000 shadow-glow-cyan"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.round(((currentUser.ratingPoints - 2000) / 1000) * 100)
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                <span className="text-emerald-400 flex items-center gap-1">
+                  ▲ +140 pts this season
+                </span>
+                <span className="text-slate-400 font-mono">160 pts to Grandmaster</span>
+              </div>
+            </div>
+
+            {/* Standing Pod */}
+            <div className="flex items-center gap-3">
+              {/* National Ranking Pill */}
+              <div className="p-4 rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-[#0A0D15] text-center min-w-[120px]">
+                <span className="text-[11px] font-normal text-amber-300 block">National</span>
+                <div className="flex items-center justify-center gap-1 my-0.5">
+                  <Crown className="w-4 h-4 text-amber-400" />
+                  <span className="text-[26px] font-bold text-white leading-none">
+                    #{currentUser.nationalRank}
+                  </span>
+                </div>
+                <span className="text-[10px] text-emerald-400 font-medium">▲ +2 positions</span>
+              </div>
+
+              {/* Regional Ranking Pill */}
+              <div className="p-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-[#0A0D15] text-center min-w-[120px]">
+                <span className="text-[11px] font-normal text-cyan-300 block">Addis Ababa</span>
+                <div className="flex items-center justify-center gap-1 my-0.5">
+                  <Trophy className="w-4 h-4 text-cyan-400" />
+                  <span className="text-[26px] font-bold text-cyan-300 leading-none">
+                    #{currentUser.regionalRank}
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-medium">Leader</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          2. ASYMMETRICAL INTERACTIVE BENTO MATRIX (Varied, Visual, Not Same Boxes)
+          ========================================================================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+        {/* TILE 1: INTERACTIVE RATING VELOCITY AREA CHART (Spans 6 cols on lg) */}
+        <div className="lg:col-span-6 rounded-3xl border border-[#232A42] bg-[#0E111A] p-5 flex flex-col justify-between space-y-4 shadow-xl relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-violet-400" />
+                <h3 className="font-sans text-[16px] font-semibold text-white">
+                  Rating Momentum & Velocity
+                </h3>
+              </div>
+              <p className="text-[13px] text-slate-400">Performance trajectory over recent sanctioned matches</p>
+            </div>
+
+            {/* Time period filter pills */}
+            <div className="flex items-center bg-[#141826] p-1 rounded-xl border border-[#232A42] text-[11px] font-medium">
+              {(["7d", "30d", "season"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setChartPeriod(p)}
+                  className={`px-2.5 py-1 rounded-lg transition uppercase ${
+                    chartPeriod === p
+                      ? "bg-violet-600 text-white font-semibold"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Interactive SVG Area Chart */}
+          <div className="relative w-full h-[140px] pt-2">
+            <svg
+              className="w-full h-full overflow-visible"
+              viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="velocityGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.45" />
+                  <stop offset="60%" stopColor="#06B6D4" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#0E111A" stopOpacity="0" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              {/* Horizontal Reference Grid Lines */}
+              <line x1="0" y1="25" x2={chartWidth} y2="25" stroke="#232A42" strokeDasharray="3 3" />
+              <line x1="0" y1="70" x2={chartWidth} y2="70" stroke="#232A42" strokeDasharray="3 3" />
+              <line x1="0" y1="115" x2={chartWidth} y2="115" stroke="#232A42" strokeDasharray="3 3" />
+
+              {/* Area fill */}
+              <polygon points={areaString} fill="url(#velocityGradient)" />
+
+              {/* Main Line with Glow */}
+              <polyline
+                fill="none"
+                stroke="#8B5CF6"
+                strokeWidth="3"
+                filter="url(#glow)"
+                points={pointsString}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Data points */}
+              {chartData.map((d, i) => {
+                const cx = getX(i);
+                const cy = getY(d.rating);
+                const isHovered = hoveredChartPoint === i;
+
+                return (
+                  <g key={i}>
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={isHovered ? 7 : 4.5}
+                      fill={isHovered ? "#06B6D4" : "#8B5CF6"}
+                      stroke="#0E111A"
+                      strokeWidth="2.5"
+                      className="cursor-pointer transition-all duration-200"
+                      onMouseEnter={() => setHoveredChartPoint(i)}
+                      onMouseLeave={() => setHoveredChartPoint(null)}
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Hover Tooltip Popup */}
+            {hoveredChartPoint !== null && (
+              <div
+                className="absolute z-20 px-3 py-1.5 rounded-xl bg-[#141826] border border-violet-500/60 shadow-2xl text-xs pointer-events-none -translate-x-1/2 -top-2 transition-all"
+                style={{
+                  left: `${(hoveredChartPoint / (chartData.length - 1)) * 100}%`,
+                }}
+              >
+                <div className="font-bold text-white flex items-center gap-1.5">
+                  <span>{chartData[hoveredChartPoint].rating} MMR</span>
+                  <span className="text-emerald-400 text-[10px]">
+                    {chartData[hoveredChartPoint].change}
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-400">
+                  vs {chartData[hoveredChartPoint].opponent} • {chartData[hoveredChartPoint].map}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom stats summary */}
+          <div className="pt-2 border-t border-[#232A42] flex items-center justify-between text-[12px] text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-violet-400" />
+              Peak: <strong className="text-white font-mono">2,840 pts</strong>
+            </span>
+            <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+              ▲ +60 pts / 7 matches
+            </span>
+            <span className="font-mono text-slate-400">92% Match Consistency</span>
+          </div>
+        </div>
+
+        {/* TILE 2: WIN/LOSS CIRCULAR DONUT GAUGE (Spans 3 cols on lg) */}
+        <div className="lg:col-span-3 rounded-3xl border border-[#232A42] bg-[#0E111A] p-5 flex flex-col justify-between space-y-3 shadow-xl">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <h3 className="font-sans text-[16px] font-semibold text-white">Win Ratio</h3>
+              <p className="text-[12px] text-slate-400">Sanctioned match conversion</p>
+            </div>
+            <Activity className="w-4 h-4 text-emerald-400" />
+          </div>
+
+          {/* Circular Donut Ring */}
+          <div className="relative flex items-center justify-center my-2">
+            <svg className="w-32 h-32 -rotate-90 transform" viewBox="0 0 100 100">
+              {/* Background track circle */}
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="#141826"
+                strokeWidth="10"
+              />
+              {/* Progress stroke */}
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                fill="none"
+                stroke="url(#winGradient)"
+                strokeWidth="10"
+                strokeDasharray={`${2 * Math.PI * 40 * (currentUser.stats.winRate / 100)} ${
+                  2 * Math.PI * 40 * (1 - currentUser.stats.winRate / 100)
+                }`}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+              />
+              <defs>
+                <linearGradient id="winGradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#10B981" />
+                  <stop offset="100%" stopColor="#06B6D4" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* Inner Center Metrics */}
+            <div className="absolute text-center">
+              <span className="font-sans text-[26px] font-bold text-white block leading-none">
+                {currentUser.stats.winRate}%
+              </span>
+              <span className="text-[11px] font-medium text-emerald-400 block mt-1">
+                {currentUser.stats.matchesWon}W - {currentUser.stats.matchesPlayed - currentUser.stats.matchesWon}L
+              </span>
+            </div>
+          </div>
+
+          {/* Win Streak & Clutch Pill */}
+          <div className="p-2.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 flex items-center justify-between text-xs">
+            <span className="flex items-center gap-1.5 font-semibold text-emerald-300">
+              <Flame className="w-4 h-4 text-amber-400" />
+              5 Match Streak
+            </span>
+            <span className="text-[11px] text-slate-300 font-mono">78% Clutch (1vX)</span>
+          </div>
+        </div>
+
+        {/* TILE 3: COMBAT FORM & K/D ACCURACY (Spans 3 cols on lg) */}
+        <div className="lg:col-span-3 rounded-3xl border border-[#232A42] bg-[#0E111A] p-5 flex flex-col justify-between space-y-4 shadow-xl">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <h3 className="font-sans text-[16px] font-semibold text-white">Recent Form</h3>
+              <p className="text-[12px] text-slate-400">Last 5 competitive series</p>
+            </div>
+            <Crosshair className="w-4 h-4 text-cyan-400" />
+          </div>
+
+          {/* Horizontal Form Pill Sequence */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-1.5">
+              {[
+                { res: "W", score: "13-9" },
+                { res: "W", score: "2-0" },
+                { res: "W", score: "13-11" },
+                { res: "L", score: "11-13" },
+                { res: "W", score: "13-7" },
+              ].map((m, idx) => (
+                <div key={idx} className="flex-1 text-center">
+                  <span
+                    className={`w-full py-1.5 rounded-lg flex items-center justify-center font-bold text-xs ${
+                      m.res === "W"
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                        : "bg-rose-500/20 text-rose-400 border border-rose-500/40"
+                    }`}
+                  >
+                    {m.res}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 block mt-1">{m.score}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Kill / Death Visual Ratio Slider */}
+          <div className="space-y-1.5 pt-2 border-t border-[#232A42]">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-400">K/D Kill Spread:</span>
+              <span className="font-mono font-bold text-cyan-300">1.84 K/D</span>
+            </div>
+            <div className="h-2 w-full bg-[#141826] rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-violet-500 w-[74%]" />
+            </div>
+            <span className="text-[10px] text-slate-500 block">Top 2% kill ratio nationwide</span>
+          </div>
+
+          {/* Total Purses */}
+          <div className="pt-2 border-t border-[#232A42] flex items-center justify-between">
+            <div className="space-y-0.5">
+              <span className="text-[11px] text-slate-400 block">Total Earnings Won</span>
+              <span className="font-sans text-[18px] font-bold text-amber-400 leading-none">
+                {formatETB(currentUser.stats.earningsETB)}
+              </span>
+            </div>
+            <Award className="w-5 h-5 text-amber-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          3. INTERACTIVE GAME PERFORMANCE STUDIO (Tabbed Showcase, Attribute Meters)
+          ========================================================================= */}
+      <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 lg:p-7 space-y-6 shadow-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="font-sans text-[18px] font-semibold text-white flex items-center gap-2">
+              <Gamepad2 className="w-5 h-5 text-violet-400" />
+              Game Performance Studio
+            </h2>
+            <p className="text-[13px] text-slate-400">
+              Interactive deep-dive into verified telemetry and combat ratings
+            </p>
+          </div>
+
+          {/* Game Tab Selector Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {currentUser.connectedGames.map((gameAcc) => (
+              <button
+                key={gameAcc.gameId}
+                onClick={() => setActiveGameTab(gameAcc.gameId)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-2 ${
+                  activeGameTab === gameAcc.gameId
+                    ? "bg-violet-600 text-white shadow-glow-violet border border-violet-500"
+                    : "bg-[#141826] text-slate-300 border border-[#232A42] hover:bg-[#1C2237]"
+                }`}
+              >
+                <Gamepad2 className="w-3.5 h-3.5" />
+                <span>{gameAcc.gameName}</span>
+              </button>
+            ))}
+
+            <button
+              onClick={() => setConnectModalOpen(true)}
+              className="px-3 py-2 rounded-xl border border-dashed border-[#3A456B] text-violet-300 hover:text-white hover:border-violet-400 text-xs font-medium transition flex items-center gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Link Title</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Active Game Detail Showcase Banner */}
+        {activeGame && (
+          <div className="rounded-2xl border border-[#232A42] bg-gradient-to-r from-[#141826] via-[#101422] to-[#0A0D15] p-5 lg:p-6 space-y-6 relative overflow-hidden">
+            {/* Top Game Meta Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-violet-600/20 border border-violet-500/40 flex items-center justify-center text-violet-300">
+                  <Gamepad2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-sans text-[16px] font-bold text-white">
+                      {activeGame.gameName}
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-950 text-violet-300 border border-violet-700/60">
+                      {activeGame.platform}
+                    </span>
+                    {activeGame.verified && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Verified Account
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[12px] text-slate-400 font-mono">
+                    IGN: <strong className="text-violet-300">{activeGame.inGameName}</strong> • {activeGame.platformId}
+                  </span>
+                </div>
+              </div>
+
+              {/* Title MMR and Rank Tier */}
+              <div className="text-left sm:text-right">
+                <span className="text-amber-400 font-bold text-sm block">
+                  {activeGame.rankTier}
+                </span>
+                <span className="text-[11px] text-slate-400 font-mono">
+                  {activeGame.points} Title Benchmark MMR
+                </span>
+              </div>
+            </div>
+
+            {/* 4 Visual Attribute Progress Meters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+              {/* Combat Rating (ACS) */}
+              <div className="p-4 rounded-xl bg-[#0E111A] border border-[#232A42] space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Combat Score (ACS)</span>
+                  <span className="font-mono font-bold text-cyan-300">285 ACS</span>
+                </div>
+                <div className="h-2 w-full bg-[#141826] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-cyan-300 w-[85%]" />
+                </div>
+                <span className="text-[10px] text-slate-500 block">Top 5% in Addis region</span>
+              </div>
+
+              {/* Headshot Accuracy */}
+              <div className="p-4 rounded-xl bg-[#0E111A] border border-[#232A42] space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Headshot Accuracy</span>
+                  <span className="font-mono font-bold text-violet-300">42.4%</span>
+                </div>
+                <div className="h-2 w-full bg-[#141826] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-purple-400 w-[74%]" />
+                </div>
+                <span className="text-[10px] text-slate-500 block">National average: 21%</span>
+              </div>
+
+              {/* Clutch Win Rate */}
+              <div className="p-4 rounded-xl bg-[#0E111A] border border-[#232A42] space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">1vX Clutch Win</span>
+                  <span className="font-mono font-bold text-emerald-400">78.0%</span>
+                </div>
+                <div className="h-2 w-full bg-[#141826] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-300 w-[92%]" />
+                </div>
+                <span className="text-[10px] text-slate-500 block">High impact in overtime</span>
+              </div>
+
+              {/* First Blood Impact */}
+              <div className="p-4 rounded-xl bg-[#0E111A] border border-[#232A42] space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">First Blood / Round</span>
+                  <span className="font-mono font-bold text-amber-400">1.42 / round</span>
+                </div>
+                <div className="h-2 w-full bg-[#141826] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-300 w-[82%]" />
+                </div>
+                <span className="text-[10px] text-slate-500 block">Entry fragger profile</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* =========================================================================
+          4. MAIN WORKSPACE: TOURNAMENT PASSES & MATCH TIMELINE (Left 8 Cols)
+             + MILESTONES & RECOMMENDED CIRCUIT (Right 4 Cols)
+          ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* LEFT 8 COLUMNS */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* TOURNAMENT PASSES & LIVE SCHEDULE (Ticket Style) */}
+          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-sans text-[16px] font-semibold text-white flex items-center gap-2">
+                  <Swords className="w-5 h-5 text-cyan-400" />
+                  My Tournament Passes & Check-ins
+                </h2>
+                <p className="text-[13px] text-slate-400">
+                  Confirmed brackets, entry credentials, and scheduled match rooms
+                </p>
+              </div>
+
+              <Link
+                href="/tournaments"
+                className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition flex items-center gap-1"
+              >
+                <span>Browse All</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {userRegisteredTournaments.length === 0 ? (
+              <div className="py-10 text-center border border-dashed border-[#232A42] rounded-2xl p-6">
+                <AlertCircle className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-300">No active tournament registrations yet</p>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                  Browse open brackets and register to represent your zone or city in upcoming official events.
+                </p>
+                <Link
+                  href="/tournaments"
+                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-600 text-white font-medium text-xs"
+                >
+                  Explore Open Tournaments
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {userRegisteredTournaments.map((t) => {
+                  const reg = t.registrations.find((r) => r.gamerId === currentUser.id);
+                  const isApproved = reg?.status === "approved";
+                  const isPending = reg?.status === "pending";
+
+                  return (
+                    <div
+                      key={t.id}
+                      className="group rounded-2xl border border-[#232A42] bg-[#141826] overflow-hidden hover:border-violet-500/50 transition-all flex flex-col sm:flex-row items-stretch"
+                    >
+                      {/* Left Banner Artwork */}
+                      <div className="relative w-full sm:w-48 h-32 sm:h-auto shrink-0 bg-slate-900 overflow-hidden">
+                        <img
+                          src={t.bannerUrl}
+                          alt={t.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#141826] hidden sm:block" />
+                        <div className="absolute top-2 left-2">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-black/80 text-violet-300 border border-violet-500/40">
+                            {t.gameName}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right Ticket Info */}
+                      <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
+                                isApproved
+                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                  : isPending
+                                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                  : "bg-slate-800 text-slate-400"
+                              }`}
+                            >
+                              Check-in: {reg?.status?.toUpperCase()}
+                            </span>
+                            <span className="text-[11px] text-amber-400 font-mono font-bold">
+                              Prize Pool: {formatETB(t.prizePoolETB)}
+                            </span>
+                          </div>
+
+                          <h4 className="text-[15px] font-semibold text-white group-hover:text-violet-300 transition">
+                            {t.title}
+                          </h4>
+
+                          <p className="text-[12px] text-slate-400 flex items-center gap-3">
+                            <span className="flex items-center gap-1 text-slate-300">
+                              <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+                              {t.location.venueName}
+                            </span>
+                            <span className="flex items-center gap-1 text-slate-400">
+                              <Calendar className="w-3 h-3 text-slate-500" />
+                              {t.dates.startsAt}
+                            </span>
+                          </p>
+                        </div>
+
+                        <div className="pt-2 border-t border-[#232A42] flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-medium">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>Match Lobby opens in 2d 14h</span>
+                          </div>
+
+                          <Link
+                            href={`/tournaments/${t.id}`}
+                            className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs transition flex items-center gap-1.5"
+                          >
+                            <span>Bracket Room</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* VERIFIED MATCH HISTORY TIMELINE (With Filter Controls) */}
+          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-5 shadow-2xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="font-sans text-[16px] font-semibold text-white flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-emerald-400" />
+                  Verified Match Timeline
+                </h2>
+                <p className="text-[13px] text-slate-400">
+                  Official tournament match records with verified scorelines
+                </p>
+              </div>
+
+              {/* Match Filter Tabs */}
+              <div className="flex items-center bg-[#141826] p-1 rounded-xl border border-[#232A42] text-[11px] font-medium">
+                <button
+                  onClick={() => setMatchFilter("all")}
+                  className={`px-3 py-1 rounded-lg transition ${
+                    matchFilter === "all" ? "bg-violet-600 text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  All ({currentUser.matchHistory.length})
+                </button>
+                <button
+                  onClick={() => setMatchFilter("win")}
+                  className={`px-3 py-1 rounded-lg transition ${
+                    matchFilter === "win" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Victories ({currentUser.matchHistory.filter((m) => m.result === "win").length})
+                </button>
+                <button
+                  onClick={() => setMatchFilter("loss")}
+                  className={`px-3 py-1 rounded-lg transition ${
+                    matchFilter === "loss" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Defeats ({currentUser.matchHistory.filter((m) => m.result === "loss").length})
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {filteredMatches.map((m) => {
+                const isWin = m.result === "win";
+
+                return (
+                  <div
+                    key={m.id}
+                    className="p-4 rounded-2xl border border-[#232A42] bg-[#141826] hover:border-[#3A456B] transition flex items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <span
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                          isWin
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                        }`}
+                      >
+                        {isWin ? "WIN" : "LOSS"}
+                      </span>
+
+                      <div className="min-w-0">
+                        <p className="font-semibold text-white text-[14px] truncate">{m.tournamentName}</p>
+                        <p className="text-slate-400 text-[12px] truncate">
+                          vs <span className="text-slate-200 font-medium">{m.opponentName}</span> • {m.date}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-bold text-[15px] text-white block">{m.score}</span>
+                      <span
+                        className={`text-[11px] font-mono font-medium ${
+                          m.ratingChange > 0 ? "text-emerald-400" : "text-rose-400"
+                        }`}
+                      >
+                        {m.ratingChange > 0 ? `+${m.ratingChange}` : m.ratingChange} MMR
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT 4 COLUMNS: CAREER QUESTS, RECOMMENDATIONS & ACHIEVEMENTS */}
+        <div className="lg:col-span-4 space-y-8">
+          {/* CAREER QUESTS & PROMOTION PROGRESS */}
+          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-amber-400" />
+              <h3 className="font-sans text-[16px] font-semibold text-white">
+                Career Quests & Bounties
+              </h3>
+            </div>
+            <p className="text-[12px] text-slate-400">
+              Active milestones towards national circuit sponsorships
+            </p>
+
+            <div className="space-y-4 pt-1">
+              {/* Quest 1 */}
+              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[#232A42]">
+                <div className="flex items-center justify-between text-xs font-medium">
+                  <span className="text-white">Road to #1 National Rank</span>
+                  <span className="text-amber-400 font-mono">75%</span>
+                </div>
+                <div className="h-1.5 w-full bg-[#0E111A] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-300 w-[75%]" />
+                </div>
+                <span className="text-[10px] text-slate-400 block">Rank #3 → Rank #1 Target</span>
+              </div>
+
+              {/* Quest 2 */}
+              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[#232A42]">
+                <div className="flex items-center justify-between text-xs font-medium">
+                  <span className="text-white">LAN Arena Dominator</span>
+                  <span className="text-cyan-400 font-mono">80%</span>
+                </div>
+                <div className="h-1.5 w-full bg-[#0E111A] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-cyan-300 w-[80%]" />
+                </div>
+                <span className="text-[10px] text-slate-400 block">4 / 5 Stage matches won</span>
+              </div>
+
+              {/* Quest 3 */}
+              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[#232A42]">
+                <div className="flex items-center justify-between text-xs font-medium">
+                  <span className="text-white">Circuit Bounty Hunter</span>
+                  <span className="text-emerald-400 font-mono">72%</span>
+                </div>
+                <div className="h-1.5 w-full bg-[#0E111A] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-300 w-[72%]" />
+                </div>
+                <span className="text-[10px] text-slate-400 block">145,000 / 200,000 ETB earned</span>
+              </div>
+            </div>
+          </div>
+
+          {/* RECOMMENDED TOURNAMENTS */}
+          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-violet-400" />
+              <h3 className="font-sans text-[16px] font-semibold text-white">
+                Recommended For You
+              </h3>
+            </div>
+            <p className="text-[12px] text-slate-400">
+              Matched based on your games and {currentUser.location.regionName} location
+            </p>
+
+            <div className="space-y-3">
+              {recommendedTournaments.map((tourn) => (
+                <div
+                  key={tourn.id}
+                  className="p-3.5 rounded-2xl border border-[#232A42] bg-[#141826] hover:border-violet-500/50 transition space-y-2 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase text-violet-300 bg-violet-950 px-2 py-0.5 rounded border border-violet-800/40 font-mono">
+                      {tourn.gameName}
+                    </span>
+                    <span className="text-[11px] font-mono font-bold text-amber-400">
+                      {formatETB(tourn.prizePoolETB)}
+                    </span>
+                  </div>
+                  <h4 className="text-[13px] font-semibold text-white group-hover:text-violet-300 transition line-clamp-1">
+                    {tourn.title}
+                  </h4>
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                    <span>{tourn.dates.startsAt}</span>
+                    <Link
+                      href={`/tournaments/${tourn.id}`}
+                      className="text-violet-400 hover:text-violet-300 font-semibold"
+                    >
+                      Details →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ACHIEVEMENTS TROPHY CASE */}
+          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-amber-400" />
+                <h3 className="font-sans text-[16px] font-semibold text-white">
+                  Trophies & Medals ({currentUser.achievements.length})
+                </h3>
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              {currentUser.achievements.map((ach) => (
+                <div
+                  key={ach.id}
+                  className="p-3 rounded-2xl border border-[#232A42] bg-[#141826] flex items-center gap-3 hover:border-amber-500/40 transition"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-700/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                    <Flame className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[13px] font-semibold text-white truncate block">
+                      {ach.title}
+                    </span>
+                    <span className="text-[11px] text-slate-400 line-clamp-1">
+                      {ach.description}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CONNECT GAME MODAL */}
+      {connectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="max-w-md w-full rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                <Gamepad2 className="w-5 h-5 text-violet-400" />
+                Link New Game Title
+              </h3>
+              <button
+                onClick={() => setConnectModalOpen(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleConnectGame} className="space-y-4">
+              <div>
+                <label className="block text-[14px] font-medium text-slate-300 mb-1">Select Game</label>
+                <select
+                  value={selectedGameId}
+                  onChange={(e) => setSelectedGameId(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-white text-[15px]"
+                >
+                  {SUPPORTED_GAMES.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name} ({g.platforms.join(", ")})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[14px] font-medium text-slate-300 mb-1">In-Game Name (IGN)</label>
+                <input
+                  type="text"
+                  required
+                  value={inGameName}
+                  onChange={(e) => setInGameName(e.target.value)}
+                  placeholder="e.g. Bekila_ETH or ViperX#ET01"
+                  className="w-full px-3 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-white text-[15px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[14px] font-medium text-slate-300 mb-1">
+                  Platform ID / Profile Link
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={platformId}
+                  onChange={(e) => setPlatformId(e.target.value)}
+                  placeholder="e.g. Steam ID, PSN Name, Riot ID"
+                  className="w-full px-3 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-white text-[15px]"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConnectModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-slate-300 text-[14px] font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-[15px]"
+                >
+                  Verify & Save Game
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
