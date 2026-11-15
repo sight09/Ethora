@@ -1,588 +1,675 @@
 "use client";
 
-import React from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import {
-  Trophy,
-  Swords,
-  ShieldCheck,
-  Flame,
-  ArrowRight,
-  Sparkles,
-  MapPin,
-  Users,
-  ChevronRight,
-  TrendingUp,
-  Award,
-  Zap,
-  Globe2,
-  Calendar,
-  Layers,
-  Gamepad2,
-  CheckCircle2,
-} from "lucide-react";
-import { EthoraEmblem } from "@/components/brand/EthoraLogo";
+import { Users, Trophy, Search, Globe, ChevronDown, Rocket } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
-import { formatETB, formatNumber, getRankTier } from "@/lib/utils";
-import { SUPPORTED_GAMES } from "@/data/games";
-import GeographicProgressionSlider from "@/components/landing/GeographicProgressionSlider";
-import AnimatedCounter from "@/components/ui/AnimatedCounter";
+import "./landing.css";
 
-export default function HomePage() {
-  const { tournaments, gamers, currentSession } = useEthora();
+interface Champion {
+  rank: string;
+  name: string;
+  team: string;
+  points: string;
+  color: "gold" | "silver" | "bronze";
+  avatar: string;
+  flag: string;
+}
 
-  // Get top 3 gamers for the podium
-  const topGamers = [...gamers].sort((a, b) => b.ratingPoints - a.ratingPoints).slice(0, 3);
-  // Get active/featured tournaments
-  const featuredTournaments = tournaments.slice(0, 3);
+const GAMES_LIST = [
+  { name: "Free Fire", icon: "⚡" },
+  { name: "PUBG Mobile", icon: "▣" },
+  { name: "Valorant", icon: "✦" },
+];
+
+const DEFAULT_LEADERBOARDS: Record<
+  string,
+  { players: string; events: string; champions: Champion[] }
+> = {
+  "Free Fire": {
+    players: "12.5K",
+    events: "03",
+    champions: [
+      {
+        rank: "01",
+        name: "ShadowKing",
+        team: "ADDIS WOLVES",
+        points: "12,450",
+        color: "gold",
+        avatar: "/images/avatar-shadowking.png",
+        flag: "🇪🇹",
+      },
+      {
+        rank: "02",
+        name: "ZenMaster",
+        team: "JIMMA TITANS",
+        points: "11,230",
+        color: "silver",
+        avatar: "/images/avatar-zenmaster.png",
+        flag: "🇪🇹",
+      },
+      {
+        rank: "03",
+        name: "GameRift",
+        team: "RIFT SQUAD",
+        points: "10,980",
+        color: "bronze",
+        avatar: "/images/avatar-gamerift.png",
+        flag: "🇪🇹",
+      },
+    ],
+  },
+  "PUBG Mobile": {
+    players: "18.9K",
+    events: "05",
+    champions: [
+      {
+        rank: "01",
+        name: "RedGhost",
+        team: "OROMIA RED STRIKERS",
+        points: "14,890",
+        color: "gold",
+        avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=300&h=300&auto=format&fit=crop",
+        flag: "🇪🇹",
+      },
+      {
+        rank: "02",
+        name: "ViperX",
+        team: "BOLE LIONS",
+        points: "13,100",
+        color: "silver",
+        avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=300&h=300&auto=format&fit=crop",
+        flag: "🇪🇹",
+      },
+      {
+        rank: "03",
+        name: "Bekila",
+        team: "HAWASSA DYNASTY",
+        points: "11,850",
+        color: "bronze",
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&h=300&auto=format&fit=crop",
+        flag: "🇪🇹",
+      },
+    ],
+  },
+  "Valorant": {
+    players: "15.2K",
+    events: "04",
+    champions: [
+      {
+        rank: "01",
+        name: "ViperX",
+        team: "APEX LEGION",
+        points: "15,200",
+        color: "gold",
+        avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=300&h=300&auto=format&fit=crop",
+        flag: "🇪🇹",
+      },
+      {
+        rank: "02",
+        name: "PhantomQueen",
+        team: "RIFT VALLEY VALKYRIES",
+        points: "13,920",
+        color: "silver",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&h=300&auto=format&fit=crop",
+        flag: "🇪🇹",
+      },
+      {
+        rank: "03",
+        name: "InvokerGod",
+        team: "TANA TITANS",
+        points: "12,410",
+        color: "bronze",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&h=300&auto=format&fit=crop",
+        flag: "🇪🇹",
+      },
+    ],
+  },
+};
+
+function CrownIcon({ color }: { color: "gold" | "silver" | "bronze" }) {
+  if (color === "gold") {
+    return (
+      <svg viewBox="0 0 24 24" width="22" height="16" fill="none">
+        <path
+          d="M2 19h20v2H2v-2zm1-5l4.5 2.5L12 7l4.5 9.5L21 14l-2 6H5l-2-6z"
+          fill="url(#gold-crown-grad)"
+        />
+        <circle cx="3" cy="13" r="1.5" fill="#FDE047" />
+        <circle cx="12" cy="6" r="1.8" fill="#FEF08A" />
+        <circle cx="21" cy="13" r="1.5" fill="#FDE047" />
+        <defs>
+          <linearGradient id="gold-crown-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FDE047" />
+            <stop offset="50%" stopColor="#EAB308" />
+            <stop offset="100%" stopColor="#CA8A04" />
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+  if (color === "silver") {
+    return (
+      <svg viewBox="0 0 24 24" width="20" height="15" fill="none">
+        <path
+          d="M2 19h20v2H2v-2zm1-5l4.5 2.5L12 7l4.5 9.5L21 14l-2 6H5l-2-6z"
+          fill="url(#silver-crown-grad)"
+        />
+        <circle cx="3" cy="13" r="1.5" fill="#F8FAFC" />
+        <circle cx="12" cy="6" r="1.8" fill="#FFFFFF" />
+        <circle cx="21" cy="13" r="1.5" fill="#F8FAFC" />
+        <defs>
+          <linearGradient id="silver-crown-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="50%" stopColor="#CBD5E1" />
+            <stop offset="100%" stopColor="#94A3B8" />
+          </linearGradient>
+        </defs>
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="15" fill="none">
+      <path
+        d="M2 19h20v2H2v-2zm1-5l4.5 2.5L12 7l4.5 9.5L21 14l-2 6H5l-2-6z"
+        fill="url(#bronze-crown-grad)"
+      />
+      <circle cx="3" cy="13" r="1.5" fill="#FDBA74" />
+      <circle cx="12" cy="6" r="1.8" fill="#FED7AA" />
+      <circle cx="21" cy="13" r="1.5" fill="#FDBA74" />
+      <defs>
+        <linearGradient id="bronze-crown-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FED7AA" />
+          <stop offset="50%" stopColor="#F97316" />
+          <stop offset="100%" stopColor="#C2410C" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+const features = [
+  {
+    icon: "♛",
+    title: "Epic tournaments",
+    text: "Compete in exciting tournaments, challenge other squads, and fight for the top spot.",
+  },
+  {
+    icon: "↗",
+    title: "Live rankings",
+    text: "Follow player progress, track your points, and see who is rising through the ranks.",
+  },
+  {
+    icon: "♧",
+    title: "Gaming community",
+    text: "Connect with players, build your squad, and grow Ethiopia's esports community.",
+  },
+  {
+    icon: "⬡",
+    title: "Fair competition",
+    text: "A trusted competitive space built around clear results and player achievement.",
+  },
+];
+
+export default function EthoraLandingPage() {
+  const { gamers } = useEthora();
+
+  // Auto-sliding game selector index
+  const [gameIndex, setGameIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Track scroll position to enhance sticky header styling
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Auto-switch games every 4.5 seconds (paused on hover)
+  useEffect(() => {
+    if (isPaused) return;
+
+    const timer = setInterval(() => {
+      setAnimating(true);
+      setTimeout(() => {
+        setGameIndex((prev) => (prev + 1) % GAMES_LIST.length);
+        setAnimating(false);
+      }, 220);
+    }, 4500);
+
+    return () => clearInterval(timer);
+  }, [isPaused]);
+
+  const handleSelectGame = (idx: number) => {
+    if (idx === gameIndex) return;
+    setAnimating(true);
+    setTimeout(() => {
+      setGameIndex(idx);
+      setAnimating(false);
+    }, 180);
+  };
+
+  const activeGame = GAMES_LIST[gameIndex];
+  const activeBoard = DEFAULT_LEADERBOARDS[activeGame.name] || DEFAULT_LEADERBOARDS["Free Fire"];
+
+  // Enrich with live mock data from context if available
+  const enrichedChampions = activeBoard.champions.map((champ) => {
+    const liveGamer = gamers.find(
+      (g) => g.gamerTag.toLowerCase() === champ.name.toLowerCase()
+    );
+    if (liveGamer) {
+      return {
+        ...champ,
+        avatar: liveGamer.avatar || champ.avatar,
+        team: liveGamer.team?.name ? liveGamer.team.name.toUpperCase() : champ.team,
+      };
+    }
+    return champ;
+  });
 
   return (
-    <div className="flex flex-col w-full overflow-hidden">
-      {/* 1. HERO SECTION */}
-      <section className="relative min-h-[90vh] flex items-center justify-center pt-8 pb-20 px-4 sm:px-6 lg:px-8 bg-ethora-mesh cyber-grid-pattern">
-        {/* Ambient background glows */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/15 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute top-1/3 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto w-full relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Hero Content */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            {/* MInT Spec: Eyebrow tag: Public Sans, 13px, weight 500, underline (not caps) */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-violet-500/30 bg-violet-950/40 backdrop-blur-md">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span className="font-sans text-[13px] font-medium text-violet-200 underline decoration-violet-400/60 underline-offset-4">
-                Addis Masters Finals • Millennium Hall Arena live now
-              </span>
-              <ChevronRight className="w-3.5 h-3.5 text-violet-400" />
-            </div>
-
-            {/* MInT Spec: Headline: Fraunces (serif), 48–64px, weight 500 */}
-            <div className="space-y-3">
-              <h1 className="font-serif text-[44px] sm:text-[54px] lg:text-[62px] font-medium text-white leading-[1.08] tracking-tight">
-                Where gamers <br />
-                <span className="text-gradient-violet">become legends.</span>
-              </h1>
-              {/* MInT Spec: Subhead: Public Sans, 18–19px, weight 400 */}
-              <p className="font-sans text-[18px] sm:text-[19px] font-normal text-slate-300 max-w-2xl leading-relaxed pt-1">
-                Ethiopia&apos;s definitive esports ecosystem. Create your verified gamer identity, compete in regional
-                circuits, rise through national leaderboards, and get scouted by premier organizations.
-              </p>
-            </div>
-
-            {/* MInT Spec: Primary & Secondary CTAs: Public Sans, 15px, weight 500 */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-3">
-              <Link
-                href="/tournaments"
-                className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-sans text-[15px] font-medium shadow-glow-violet transition-all flex items-center justify-center gap-2 group"
-              >
-                <Swords className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                <span>Explore Competitions</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-
-              <Link
-                href={currentSession.role === "guest" ? "/auth/signin" : "/dashboard"}
-                className="w-full sm:w-auto px-7 py-3.5 rounded-xl border border-[#3A456B] bg-[#0E111A]/90 hover:bg-[#141826] hover:border-violet-500/50 text-slate-200 hover:text-white font-sans text-[15px] font-medium transition-all flex items-center justify-center gap-2"
-              >
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>{currentSession.role === "guest" ? "Sign In / Register" : "Open Dashboard"}</span>
-              </Link>
-            </div>
-
-            {/* Subtle Proof badges */}
-            <div className="pt-6 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs text-slate-400">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Verified Anti-Cheat</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Instant ETB Payouts</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Multi-Level Geographic Rankings</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Hero Visual: 3D-styled Gamer Identity & Live Bracket Card */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative mx-auto max-w-md w-full">
-              {/* Decorative back glow */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-violet-600/30 to-cyan-500/30 rounded-3xl blur-2xl transform rotate-3 scale-95" />
-
-              {/* Main Gamer Card Preview */}
-              <div className="relative rounded-2xl border border-violet-500/40 bg-[#0E111A]/95 p-6 shadow-2xl backdrop-blur-xl">
-                {/* Header with Ethiopian subtle pride tag */}
-                <div className="flex items-center justify-between pb-4 border-b border-[#232A42]">
-                  <div className="flex items-center gap-2">
-                    <EthoraEmblem size="sm" />
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                          ETHORA PASSPORT
-                        </span>
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      </div>
-                      <span className="text-[10px] text-slate-400">National Competitor Registry</span>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-violet-950/80 text-violet-300 border border-violet-700/50">
-                    ETH-7729-VIPER
-                  </span>
-                </div>
-
-                {/* Player Profile Details */}
-                <div className="pt-4 flex items-center gap-4">
-                  <div className="relative shrink-0">
-                    <img
-                      src={gamers[0].avatar}
-                      alt={gamers[0].gamerTag}
-                      className="w-16 h-16 rounded-xl object-cover border-2 border-violet-500 shadow-glow-violet"
-                    />
-                    <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center gap-0.5 shadow">
-                      <Trophy className="w-2.5 h-2.5" />
-                      #1
-                    </div>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-black text-white truncate font-mono">{gamers[0].gamerTag}</h3>
-                      <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                    </div>
-                    <p className="text-xs text-slate-400 truncate">{gamers[0].realName}</p>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-1">
-                      <MapPin className="w-3 h-3 text-cyan-400" />
-                      <span>Bole Sub-City, Addis Ababa</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stat Grid */}
-                <div className="grid grid-cols-3 gap-2.5 mt-5">
-                  <div className="p-2.5 rounded-xl bg-[#141826] border border-[#232A42] text-center">
-                    <span className="text-[10px] uppercase font-semibold text-slate-400 block">Rating Points</span>
-                    <span className="text-lg font-black text-violet-400 font-mono">3,420</span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-[#141826] border border-[#232A42] text-center">
-                    <span className="text-[10px] uppercase font-semibold text-slate-400 block">Win Rate</span>
-                    <span className="text-lg font-black text-emerald-400 font-mono">77.0%</span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-[#141826] border border-[#232A42] text-center">
-                    <span className="text-[10px] uppercase font-semibold text-slate-400 block">Earned</span>
-                    <span className="text-sm font-black text-amber-400 font-mono truncate mt-1 block">385K ETB</span>
-                  </div>
-                </div>
-
-                {/* Floating Tournament Card Overlay */}
-                <div className="mt-4 p-3 rounded-xl bg-gradient-to-r from-violet-950/60 to-purple-900/40 border border-violet-500/40 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-violet-600/40 flex items-center justify-center text-violet-300">
-                      <Flame className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">VCT Africa Ascension Qualifier</p>
-                      <p className="text-[10px] text-emerald-400 font-medium">Grand Finals Match • In Progress</p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-mono font-bold text-white px-2 py-1 rounded bg-violet-600/60">
-                    2 - 1
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+    <main className="ethora-home">
+      {/* 1. TOP NAVIGATION HEADER (MATCHING REFERENCE IMAGE - STICKY) */}
+      <header className={`site-header ${isScrolled ? "header-scrolled" : ""}`}>
+        {/* Esports Smooth Curved HUD Neon Line */}
+        <div className="header-hud-border-wrap">
+          <svg className="header-hud-svg" viewBox="0 0 1000 78" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="header-neon-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#c084fc" stopOpacity="0.85" />
+                <stop offset="12%" stopColor="#a855f7" stopOpacity="1" />
+                <stop offset="50%" stopColor="#9333ea" stopOpacity="1" />
+                <stop offset="88%" stopColor="#a855f7" stopOpacity="1" />
+                <stop offset="100%" stopColor="#c084fc" stopOpacity="0.85" />
+              </linearGradient>
+              <filter id="neon-glow" x="-10%" y="-30%" width="120%" height="160%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <path
+              d="M 0,0 L 20,58 Q 26,76 46,76 L 954,76 Q 974,76 980,58 L 1000,0"
+              fill="none"
+              stroke="url(#header-neon-grad)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              filter="url(#neon-glow)"
+            />
+          </svg>
         </div>
-      </section>
 
-      {/* 2. LIVE COMPETITIVE STATS BAR (ANIMATED COUNT-UP NUMBERS) */}
-      <section className="w-full border-y border-[#232A42] bg-[#0A0D15]/95 backdrop-blur-md py-8 px-4 sm:px-6 lg:px-8 relative z-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {/* 1. Registered Gamers: 48,200+ */}
-            <div className="flex items-center gap-4 group cursor-pointer p-3 rounded-2xl hover:bg-[#141826]/60 transition-all border border-transparent hover:border-violet-500/30">
-              <div className="w-12 h-12 rounded-xl bg-violet-600/15 border border-violet-500/30 flex items-center justify-center text-violet-400 shrink-0 group-hover:scale-110 group-hover:bg-violet-600/25 transition-all shadow-glow-violet">
-                <Users className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-black text-white font-mono flex items-center">
-                  <AnimatedCounter
-                    target={48200}
-                    suffix="+"
-                    duration={2400}
-                    formatComma={true}
-                    className="group-hover:text-violet-300 transition-colors"
-                  />
-                </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider font-sans">
-                    Registered Gamers
-                  </p>
-                </div>
-              </div>
-            </div>
+        {/* Brand: Logo + Name */}
+        <Link className="brand" href="/" aria-label="ETHORA home">
+          <Image
+            src="/ethora-logo.png"
+            alt="ETHORA Logo"
+            width={44}
+            height={44}
+            className="brand-logo-img"
+            priority
+          />
+          <span className="brand-name">ETHORA</span>
+        </Link>
 
-            {/* 2. Active Tournaments: 38 */}
-            <div className="flex items-center gap-4 group cursor-pointer p-3 rounded-2xl hover:bg-[#141826]/60 transition-all border border-transparent hover:border-cyan-500/30">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0 group-hover:scale-110 group-hover:bg-cyan-500/25 transition-all shadow-glow-cyan">
-                <Swords className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-black text-white font-mono flex items-center">
-                  <AnimatedCounter
-                    target={38}
-                    duration={1800}
-                    className="group-hover:text-cyan-300 transition-colors"
-                  />
-                </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider font-sans">
-                    Active Tournaments
-                  </p>
-                </div>
-              </div>
-            </div>
+        {/* Center Navigation */}
+        <nav className="header-nav">
+          <Link className="header-nav-link active" href="/">
+            <span>Home</span>
+            <div className="header-nav-indicator" />
+          </Link>
+          <Link className="header-nav-link" href="/tournaments">
+            <span>Tournaments</span>
+          </Link>
+          <Link className="header-nav-link" href="/rankings">
+            <span>Rankings</span>
+          </Link>
+          <Link className="header-nav-link" href="#community">
+            <span>Community</span>
+          </Link>
+          <Link className="header-nav-link" href="#support">
+            <span>Support</span>
+          </Link>
+        </nav>
 
-            {/* 3. Verified Teams: 420+ */}
-            <div className="flex items-center gap-4 group cursor-pointer p-3 rounded-2xl hover:bg-[#141826]/60 transition-all border border-transparent hover:border-amber-500/30">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-110 group-hover:bg-amber-500/25 transition-all">
-                <Layers className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-black text-white font-mono flex items-center">
-                  <AnimatedCounter
-                    target={420}
-                    suffix="+"
-                    duration={2000}
-                    className="group-hover:text-amber-300 transition-colors"
-                  />
-                </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider font-sans">
-                    Verified Teams
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 4. Prizes Distributed: 1.8M+ ETB */}
-            <div className="flex items-center gap-4 group cursor-pointer p-3 rounded-2xl hover:bg-[#141826]/60 transition-all border border-transparent hover:border-emerald-500/30">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 group-hover:bg-emerald-500/25 transition-all">
-                <Trophy className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono flex items-center">
-                  <AnimatedCounter
-                    target={1.8}
-                    decimals={1}
-                    suffix="M+ ETB"
-                    duration={2500}
-                    className="group-hover:text-emerald-300 transition-colors"
-                  />
-                </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider font-sans">
-                    Prizes Distributed
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. FEATURED TOURNAMENTS */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-violet-500" />
-              <span className="text-xs font-bold uppercase tracking-wider text-violet-400 font-mono">
-                Premier Competitions
-              </span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white font-mono">FEATURED TOURNAMENTS</h2>
-          </div>
-
-          <Link
-            href="/tournaments"
-            className="inline-flex items-center gap-2 text-sm font-bold text-violet-400 hover:text-violet-300 transition group"
+        {/* Right Actions: Search + Language + Get Started */}
+        <div className="header-actions">
+          <button
+            type="button"
+            className="header-icon-btn"
+            aria-label="Search"
+            onClick={() => {}}
           >
-            <span>View All Tournaments ({tournaments.length})</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <Search className="w-5 h-5 text-gray-300 hover:text-white transition" />
+          </button>
+
+          <div className="lang-selector">
+            <Globe className="w-4 h-4 text-gray-300" />
+            <span className="lang-text">EN</span>
+            <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+          </div>
+
+          <Link className="btn-get-started" href="/auth/signin">
+            <Rocket className="w-4 h-4" />
+            <span>Get Started</span>
+          </Link>
+        </div>
+      </header>
+
+      {/* 2. HERO SECTION */}
+      <section className="hero" id="home">
+        <div className="hero-art" />
+        <div className="hero-overlay" />
+        <div className="hero-content">
+          <div className="hero-tag">
+            <span>♛</span> ETHIOPIA&apos;S PREMIER ESPORTS PLATFORM
+          </div>
+          <p className="hero-kicker">THE ARENA IS YOURS</p>
+          <h1>
+            WHERE GAMERS<br />
+            <span>BECOME LEGENDS.</span>
+          </h1>
+          <p className="hero-subtitle">
+            Compete. Climb. Be the Best. Join ETHORA and show your skills in thrilling tournaments and rankings!
+          </p>
+          <div className="hero-buttons">
+            <Link className="btn-primary" href="/rankings">
+              <span>🏆</span> Explore Rankings <span>→</span>
+            </Link>
+            <Link className="btn-secondary" href="/tournaments">
+              <span className="play-icon">▶</span> Watch Trailer
+            </Link>
+          </div>
+          <div className="community-proof">
+            <div className="avatar-stack">
+              <img
+                src="/images/ethora-mascot.png"
+                alt="Pro Gamer"
+                className="w-7 h-7 rounded-full object-cover border border-purple-400"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=100&auto=format&fit=crop"
+                alt="Pro Gamer"
+                className="w-7 h-7 rounded-full object-cover border border-purple-400"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop"
+                alt="Pro Gamer"
+                className="w-7 h-7 rounded-full object-cover border border-purple-400"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=100&auto=format&fit=crop"
+                alt="Pro Gamer"
+                className="w-7 h-7 rounded-full object-cover border border-purple-400"
+              />
+            </div>
+            <div>
+              <strong>+25K Active Gamers</strong>
+              <small>One community. One arena.</small>
+            </div>
+          </div>
+        </div>
+        <div className="hero-vertical">
+          ETHORA <i /> COMPETE WITHOUT LIMITS
+        </div>
+        <div className="hero-scroll">
+          <span /> SCROLL TO EXPLORE
+        </div>
+      </section>
+
+      {/* 3. QUICK BOARD SECTION (CURRENT STANDOUTS AUTO-SLIDER) */}
+      <section
+        className="quick-board"
+        aria-label="Featured leaderboard"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Left: Top Players intro */}
+        <div className="board-intro">
+          <div className="board-intro-header">
+            <div className="crown-icon-wrap">
+              <span>♛</span>
+            </div>
+            <div className="board-intro-text">
+              <h2>Top Players</h2>
+              <p>Current Leaderboard</p>
+            </div>
+          </div>
+          <Link className="btn-view-rankings" href="/rankings">
+            View Full Rankings <span>→</span>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredTournaments.map((tourn) => {
-            const isFull = tourn.registeredCount >= tourn.maxParticipants;
-            const isLive = tourn.status === "live";
+        {/* Middle: 3 Champions with Crown above Avatar */}
+        <div className={`champion-list ${animating ? "animating" : ""}`}>
+          {enrichedChampions.map((player) => (
+            <div className="champion-card" key={player.rank + player.name}>
+              <div className="champion-avatar-box">
+                <div className={`crown-badge ${player.color}`}>
+                  <CrownIcon color={player.color} />
+                </div>
+                <div className="player-avatar-ring">
+                  <img
+                    src={player.avatar}
+                    alt={player.name}
+                    width={40}
+                    height={40}
+                    style={{ aspectRatio: "1 / 1", objectFit: "cover" }}
+                    className="player-avatar-img"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/images/ethora-mascot.png";
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="champion-meta">
+                <div className="player-name-row">
+                  <span className="player-name">{player.name}</span>
+                  <span className="player-flag-badge">{player.flag || "🇪🇹"}</span>
+                </div>
+                <div className="player-points-row">
+                  <span className={`player-points-val ${player.color}`}>{player.points}</span>
+                  <span className={`player-points-tag ${player.color}`}>PTS</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
 
-            return (
-              <div
-                key={tourn.id}
-                className="group rounded-2xl border border-[#232A42] bg-[#0E111A] overflow-hidden hover:border-[#3A456B] hover:shadow-2xl transition-all duration-300 flex flex-col"
+        {/* Right: Game switcher & live stats */}
+        <div className="board-side">
+          <div className="game-switch">
+            {GAMES_LIST.map((item, idx) => (
+              <button
+                key={item.name}
+                onClick={() => handleSelectGame(idx)}
+                className={gameIndex === idx ? "chosen" : ""}
+                type="button"
               >
-                {/* Banner & Badges */}
-                <div className="relative h-48 w-full overflow-hidden bg-slate-900">
-                  <img
-                    src={tourn.bannerUrl}
-                    alt={tourn.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0E111A] via-[#0E111A]/40 to-transparent" />
-
-                  {/* Status Tag */}
-                  <div className="absolute top-3 left-3 flex items-center gap-2">
-                    {isLive ? (
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-600 text-white flex items-center gap-1.5 shadow-lg animate-pulse">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white" />
-                        LIVE MATCHES
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-violet-600/90 text-white border border-violet-400/30">
-                        {tourn.status === "registration_open" ? "REGISTRATION OPEN" : "UPCOMING"}
-                      </span>
-                    )}
-                    <span className="px-2 py-1 rounded-md text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-slate-300 border border-slate-700">
-                      {tourn.venueType}
-                    </span>
-                  </div>
-
-                  {/* Game Title Badge */}
-                  <div className="absolute bottom-3 left-3">
-                    <span className="px-2.5 py-1 rounded-md text-xs font-black tracking-wider uppercase bg-black/80 text-violet-300 border border-violet-500/30 font-mono">
-                      {tourn.gameName}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-white group-hover:text-violet-300 transition line-clamp-1">
-                      {tourn.title}
-                    </h3>
-                    <p className="text-xs text-slate-400 line-clamp-2 mt-1.5 leading-relaxed">
-                      {tourn.description}
-                    </p>
-                  </div>
-
-                  {/* Prize & Info Bar */}
-                  <div className="pt-3 border-t border-[#232A42] grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">Prize Pool</span>
-                      <span className="text-base font-black text-amber-400 font-mono">
-                        {formatETB(tourn.prizePoolETB)}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">Slots Filled</span>
-                      <span className="text-sm font-bold text-slate-200 font-mono">
-                        {tourn.registeredCount} / {tourn.maxParticipants} Teams
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Action Link */}
-                  <Link
-                    href={`/tournaments/${tourn.id}`}
-                    className="w-full py-2.5 rounded-xl border border-violet-500/40 bg-violet-600/10 hover:bg-violet-600 text-violet-300 hover:text-white font-bold text-xs tracking-wider uppercase transition flex items-center justify-center gap-2 group-hover:border-violet-500"
-                  >
-                    <span>View Tournament & Bracket</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 4. TOP RANKED GAMERS PODIUM */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#0A0D15]/80 border-y border-[#232A42]">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs font-semibold mb-3">
-              <Trophy className="w-3.5 h-3.5" />
-              National Esports Leaderboard
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white font-mono">ETHIOPIA'S APEX GAMERS</h2>
-            <p className="text-sm text-slate-400 mt-2">
-              The highest rated competitive athletes across all supported titles, verified through official tournament play.
-            </p>
+                <span>{item.icon}</span>
+                <span>{item.name}</span>
+              </button>
+            ))}
           </div>
-
-          {/* Podium Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end max-w-4xl mx-auto">
-            {/* Rank 2 (Left) */}
-            {topGamers[1] && (
-              <div className="rounded-2xl border border-[#232A42] bg-[#0E111A] p-6 text-center flex flex-col items-center hover:border-slate-500 transition">
-                <div className="relative mb-3">
-                  <img
-                    src={topGamers[1].avatar}
-                    alt={topGamers[1].gamerTag}
-                    className="w-20 h-20 rounded-2xl object-cover border-2 border-slate-400"
-                  />
-                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-slate-300 text-slate-900 font-black text-xs flex items-center justify-center shadow">
-                    #2
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white font-mono">{topGamers[1].gamerTag}</h3>
-                <p className="text-xs text-slate-400">{topGamers[1].realName}</p>
-                <div className="mt-3 px-3 py-1 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-200">
-                  {topGamers[1].ratingPoints} Points
-                </div>
-                <p className="text-[11px] text-slate-500 mt-2">{topGamers[1].location.regionName}</p>
+          <div className="board-stats">
+            <div className="stat-pill">
+              <Users className="stat-icon" />
+              <div className="stat-meta">
+                <small>Total Players</small>
+                <strong>{activeBoard.players}</strong>
               </div>
-            )}
-
-            {/* Rank 1 (Center - Elevated) */}
-            {topGamers[0] && (
-              <div className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-b from-[#141826] to-[#0E111A] p-7 text-center flex flex-col items-center shadow-glow-gold relative -translate-y-4">
-                <div className="absolute -top-3 px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
-                  National Champion
-                </div>
-                <div className="relative mb-4 mt-2">
-                  <img
-                    src={topGamers[0].avatar}
-                    alt={topGamers[0].gamerTag}
-                    className="w-24 h-24 rounded-2xl object-cover border-4 border-amber-400 shadow-2xl"
-                  />
-                  <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-amber-400 text-slate-950 font-black text-sm flex items-center justify-center shadow-lg">
-                    #1
-                  </span>
-                </div>
-                <h3 className="text-2xl font-black text-white font-mono">{topGamers[0].gamerTag}</h3>
-                <p className="text-xs text-slate-400">{topGamers[0].realName}</p>
-                <div className="mt-3 px-4 py-1.5 rounded-full text-sm font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                  {topGamers[0].ratingPoints} Points
-                </div>
-                <p className="text-xs text-amber-200/80 mt-2">{topGamers[0].location.communityName}</p>
+            </div>
+            <div className="stat-pill">
+              <Trophy className="stat-icon" />
+              <div className="stat-meta">
+                <small>Ongoing Tournaments</small>
+                <strong>{activeBoard.events}</strong>
               </div>
-            )}
-
-            {/* Rank 3 (Right) */}
-            {topGamers[2] && (
-              <div className="rounded-2xl border border-[#232A42] bg-[#0E111A] p-6 text-center flex flex-col items-center hover:border-amber-700 transition">
-                <div className="relative mb-3">
-                  <img
-                    src={topGamers[2].avatar}
-                    alt={topGamers[2].gamerTag}
-                    className="w-20 h-20 rounded-2xl object-cover border-2 border-amber-700"
-                  />
-                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-amber-700 text-white font-black text-xs flex items-center justify-center shadow">
-                    #3
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white font-mono">{topGamers[2].gamerTag}</h3>
-                <p className="text-xs text-slate-400">{topGamers[2].realName}</p>
-                <div className="mt-3 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-950/40 text-amber-400 border border-amber-800/40">
-                  {topGamers[2].ratingPoints} Points
-                </div>
-                <p className="text-[11px] text-slate-500 mt-2">{topGamers[2].location.regionName}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="text-center mt-10">
-            <Link
-              href="/rankings"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-violet-500/40 bg-violet-600/10 hover:bg-violet-600 text-white font-bold text-xs uppercase tracking-wider transition"
-            >
-              <span>Explore Complete National & Regional Leaderboards</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. ETHIOPIAN GEOGRAPHIC PROGRESSION SYSTEM (DYNAMIC SLIDING & MOVABLE) */}
-      <GeographicProgressionSlider />
-
-      {/* 6. ETHORA AI ASSISTANT HIGHLIGHT */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-violet-950/30 via-[#0E111A] to-purple-950/30 border-y border-[#232A42]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-7 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              Integrated AI Esports Intelligence
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white font-mono">
-              MEET ETHORA AI — YOUR COMPETITIVE COPILOT
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Whether you need advice on tournament registration eligibility, analyzing your K/D trends, finding local
-              teammates in Bole or Hawassa, or organizing single-elimination brackets, ETHORA AI is built into every
-              interaction.
-            </p>
-            <div className="pt-2">
-              <Link
-                href="/assistant"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs uppercase tracking-wider shadow-glow-violet transition"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Chat with Ethora AI</span>
-              </Link>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5 p-5 rounded-2xl border border-violet-500/30 bg-[#0E111A]/90 shadow-2xl space-y-3 font-mono text-xs">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#232A42] text-slate-400">
-              <Sparkles className="w-4 h-4 text-violet-400" />
-              <span className="font-bold text-white">Ethora AI Query Simulation</span>
-            </div>
-            <div className="p-3 rounded-lg bg-[#141826] text-slate-300">
-              <span className="text-violet-400 font-bold">You:</span> "What Valorant tournaments in Addis Ababa are open
-              for Ascendant rank players this month?"
-            </div>
-            <div className="p-3 rounded-lg bg-violet-950/30 border border-violet-500/30 text-slate-200 space-y-2">
-              <span className="text-cyan-400 font-bold">Ethora AI:</span>
-              <p className="font-sans text-xs leading-relaxed text-slate-300">
-                "Found 2 tournaments matching your profile:
-                <br />
-                1. <strong>Ethiopian National Valorant Masters</strong> (Double Elim, 250,000 ETB Prize).
-                <br />
-                2. <strong>Sarbet Arena 5v5 Scrim Series</strong> (Weekend LAN). Your rating of 3,420 meets all entry requirements!"
-              </p>
             </div>
           </div>
         </div>
+
+        {/* Live Auto-slide progress bar */}
+        <div className="board-progress-track">
+          <div
+            key={gameIndex}
+            className={`board-progress-fill ${isPaused ? "paused" : ""}`}
+          />
+        </div>
       </section>
 
-      {/* 7. BOTTOM CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-radial-gradient from-violet-900/20 via-transparent to-transparent pointer-events-none" />
-        <div className="max-w-3xl mx-auto space-y-6 relative z-10">
-          <h2 className="text-3xl sm:text-5xl font-black text-white font-mono">
-            YOUR JOURNEY TO THE TOP STARTS HERE.
-          </h2>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Join thousands of Ethiopian competitors. Claim your Gamer ID, discover open tournaments, and turn your gaming
-            passion into recognized competitive excellence.
+      {/* 4. FEATURES SECTION (MOVING SLOWLY FROM LEFT TO RIGHT) */}
+      <section className="features-section" id="community">
+        <div className="section-title">
+          <p className="section-eyebrow">
+            <span>✦</span> MORE THAN A GAME — A COMMUNITY
           </p>
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/auth/signup"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm tracking-wide shadow-glow-violet transition"
-            >
-              Register Gamer Passport
-            </Link>
-            <Link
-              href="/tournaments"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl border border-[#3A456B] bg-[#0E111A] hover:bg-[#141826] text-slate-200 font-bold text-sm tracking-wide transition"
-            >
-              Browse Open Brackets
-            </Link>
+          <h2>
+            WHY CHOOSE <span>ETHORA?</span>
+          </h2>
+          <p>Everything you need to compete, connect, and make your mark.</p>
+        </div>
+
+        {/* Continuous Auto-Sliding Feature Carousel (Left to Right) */}
+        <div className="features-slider-wrapper">
+          <div className="features-track">
+            {[...features, ...features].map((feature, index) => (
+              <article
+                className="feature-card feature-card-slide"
+                key={`${feature.title}-${index}`}
+              >
+                <div className="feature-icon">{feature.icon}</div>
+                <h3>{feature.title}</h3>
+                <p>{feature.text}</p>
+                <span className="feature-index">0{(index % 4) + 1}</span>
+              </article>
+            ))}
           </div>
         </div>
       </section>
-    </div>
+
+      {/* 5. JOIN SECTION (HOODED MASCOT CTA BANNER) */}
+      <section className="join-section">
+        <div className="join-copy">
+          <p className="section-eyebrow">YOUR LEGEND STARTS HERE</p>
+          <h2>
+            READY TO <span>RISE?</span>
+          </h2>
+          <p>Create your gamer profile, find your competition, and start your journey to the top.</p>
+          <Link className="btn-primary" href="/auth/signup">
+            Join ETHORA <span>↗</span>
+          </Link>
+        </div>
+        <div className="mascot-frame">
+          <Image
+            src="/images/ethora-mascot.png"
+            alt="ETHORA hooded gamer mascot"
+            fill
+            sizes="(max-width: 700px) 80vw, 420px"
+            className="mascot-image"
+          />
+          <div className="mascot-glow" />
+        </div>
+      </section>
+
+      {/* 6. SITE FOOTER (MATCHING REFERENCE IMAGE) */}
+      <footer className="site-footer" id="support">
+        {/* Left: Brand + Slogan */}
+        <div className="footer-left">
+          <Link className="brand" href="/">
+            <Image
+              src="/ethora-logo.png"
+              alt="ETHORA Logo"
+              width={38}
+              height={38}
+              className="brand-logo-img"
+            />
+            <span className="brand-name">ETHORA</span>
+          </Link>
+          <span className="footer-v-divider" />
+          <span className="footer-slogan">Where Gamers Become Legend</span>
+        </div>
+
+        {/* Center: Legal & Support Links */}
+        <div className="footer-nav">
+          <Link href="/about" className="footer-link">About</Link>
+          <span className="footer-sep">|</span>
+          <Link href="/terms" className="footer-link">Terms</Link>
+          <span className="footer-sep">|</span>
+          <Link href="/privacy" className="footer-link">Privacy</Link>
+          <span className="footer-sep">|</span>
+          <Link href="/assistant" className="footer-link">Support</Link>
+        </div>
+
+        {/* Right: Social Gaming Icons (Discord, YouTube, Telegram, X, Gamepad) */}
+        <div className="footer-socials">
+          <a
+            href="https://discord.gg"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Discord"
+            className="social-icon-btn"
+          >
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+            </svg>
+          </a>
+
+          <a
+            href="https://youtube.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+            className="social-icon-btn"
+          >
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+            </svg>
+          </a>
+
+          <a
+            href="https://t.me"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Telegram"
+            className="social-icon-btn"
+          >
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .36z" />
+            </svg>
+          </a>
+
+          <a
+            href="https://x.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="X"
+            className="social-icon-btn"
+          >
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+          </a>
+
+          <a
+            href="/tournaments"
+            aria-label="Games"
+            className="social-icon-btn"
+          >
+            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+            </svg>
+          </a>
+        </div>
+      </footer>
+    </main>
   );
 }

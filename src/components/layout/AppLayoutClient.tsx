@@ -21,12 +21,12 @@ export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ child
     setAiChatOpen((prev) => !prev);
   };
 
-  // If on an authentication page (e.g. /auth/signin, /auth/signup), render standalone full screen
-  if (isAuthPage) {
+  // If on an authentication page or landing page, render standalone full screen
+  if (isAuthPage || pathname === "/") {
     return (
-      <main className="min-h-screen w-full bg-[#070913] text-slate-100 overflow-x-hidden">
+      <div className="min-h-screen w-full bg-[#05030a] text-slate-100">
         {children}
-      </main>
+      </div>
     );
   }
 
