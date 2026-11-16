@@ -36,15 +36,16 @@ export default function DynamicGamerProfilePage() {
 
   return (
     <div className="flex-1 w-full pb-16">
-      {/* 1. COVER BANNER */}
-      <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-900 border-b border-[#232A42]">
+      {/* 1. COVER BANNER (EPIC ETHORA STADIUM ARENA) */}
+      <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-[#0A0A12] border-b border-[rgba(168,85,247,0.25)]">
         <img
-          src={profile.banner}
+          src="/images/ethora-stadium-banner.jpg"
           alt={profile.gamerTag}
-          className="w-full h-full object-cover opacity-75 filter contrast-125"
+          className="w-full h-full object-cover object-center opacity-85 filter contrast-125"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#08090E] via-[#08090E]/50 to-transparent" />
-        <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#08090E] via-[#08090E]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#08090E]/60 via-transparent to-[#08090E]/60" />
+        <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
           <Link
             href="/rankings"
             className="px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/90 text-white text-xs font-bold border border-white/20 backdrop-blur-md flex items-center gap-2 transition"

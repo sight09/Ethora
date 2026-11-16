@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Users, Trophy, Search, Globe, ChevronDown, Rocket } from "lucide-react";
+import { Users, Trophy, Globe, ChevronDown, Rocket } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
 import "./landing.css";
 
@@ -221,10 +221,9 @@ export default function EthoraLandingPage() {
   const [animating, setAnimating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Track scroll position to enhance sticky header styling
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 15);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -274,21 +273,21 @@ export default function EthoraLandingPage() {
 
   return (
     <main className="ethora-home">
-      {/* 1. TOP NAVIGATION HEADER (MATCHING REFERENCE IMAGE - STICKY) */}
+      {/* 1. TOP HEADER (CURVED CYBER HUD, TRANSLUCENT & STICKY ON SCROLL) */}
       <header className={`site-header ${isScrolled ? "header-scrolled" : ""}`}>
-        {/* Esports Smooth Curved HUD Neon Line */}
-        <div className="header-hud-border-wrap">
-          <svg className="header-hud-svg" viewBox="0 0 1000 78" preserveAspectRatio="none">
+        {/* Esports Smooth Curved HUD Neon Border */}
+        <div className="header-hud-border-wrap" aria-hidden="true">
+          <svg className="header-hud-svg" viewBox="0 0 1000 62" preserveAspectRatio="none">
             <defs>
               <linearGradient id="header-neon-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#c084fc" stopOpacity="0.85" />
-                <stop offset="12%" stopColor="#a855f7" stopOpacity="1" />
-                <stop offset="50%" stopColor="#9333ea" stopOpacity="1" />
-                <stop offset="88%" stopColor="#a855f7" stopOpacity="1" />
-                <stop offset="100%" stopColor="#c084fc" stopOpacity="0.85" />
+                <stop offset="0%" stopColor="#C084FC" stopOpacity="0.85" />
+                <stop offset="12%" stopColor="#A855F7" stopOpacity="1" />
+                <stop offset="50%" stopColor="#9333EA" stopOpacity="1" />
+                <stop offset="88%" stopColor="#A855F7" stopOpacity="1" />
+                <stop offset="100%" stopColor="#C084FC" stopOpacity="0.85" />
               </linearGradient>
               <filter id="neon-glow" x="-10%" y="-30%" width="120%" height="160%">
-                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feGaussianBlur stdDeviation="2.2" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
@@ -296,10 +295,10 @@ export default function EthoraLandingPage() {
               </filter>
             </defs>
             <path
-              d="M 0,0 L 20,58 Q 26,76 46,76 L 954,76 Q 974,76 980,58 L 1000,0"
+              d="M 0,0 L 18,38 C 22,48 32,60 50,60 L 950,60 C 968,60 978,48 982,38 L 1000,0"
               fill="none"
               stroke="url(#header-neon-grad)"
-              strokeWidth="2"
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
               filter="url(#neon-glow)"
@@ -312,53 +311,24 @@ export default function EthoraLandingPage() {
           <Image
             src="/ethora-logo.png"
             alt="ETHORA Logo"
-            width={44}
-            height={44}
+            width={36}
+            height={36}
             className="brand-logo-img"
             priority
           />
           <span className="brand-name">ETHORA</span>
         </Link>
 
-        {/* Center Navigation */}
-        <nav className="header-nav">
-          <Link className="header-nav-link active" href="/">
-            <span>Home</span>
-            <div className="header-nav-indicator" />
-          </Link>
-          <Link className="header-nav-link" href="/tournaments">
-            <span>Tournaments</span>
-          </Link>
-          <Link className="header-nav-link" href="/rankings">
-            <span>Rankings</span>
-          </Link>
-          <Link className="header-nav-link" href="#community">
-            <span>Community</span>
-          </Link>
-          <Link className="header-nav-link" href="#support">
-            <span>Support</span>
-          </Link>
-        </nav>
-
-        {/* Right Actions: Search + Language + Get Started */}
+        {/* Right Actions: Language + Get Started */}
         <div className="header-actions">
-          <button
-            type="button"
-            className="header-icon-btn"
-            aria-label="Search"
-            onClick={() => {}}
-          >
-            <Search className="w-5 h-5 text-gray-300 hover:text-white transition" />
-          </button>
-
           <div className="lang-selector">
-            <Globe className="w-4 h-4 text-gray-300" />
+            <Globe className="w-3.5 h-3.5 text-gray-300" />
             <span className="lang-text">EN</span>
-            <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+            <ChevronDown className="w-3 h-3 text-gray-400" />
           </div>
 
           <Link className="btn-get-started" href="/auth/signin">
-            <Rocket className="w-4 h-4" />
+            <Rocket className="w-3.5 h-3.5" />
             <span>Get Started</span>
           </Link>
         </div>
@@ -369,10 +339,6 @@ export default function EthoraLandingPage() {
         <div className="hero-art" />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <div className="hero-tag">
-            <span>♛</span> ETHIOPIA&apos;S PREMIER ESPORTS PLATFORM
-          </div>
-          <p className="hero-kicker">THE ARENA IS YOURS</p>
           <h1>
             WHERE GAMERS<br />
             <span>BECOME LEGENDS.</span>
@@ -456,14 +422,14 @@ export default function EthoraLandingPage() {
                 <div className={`crown-badge ${player.color}`}>
                   <CrownIcon color={player.color} />
                 </div>
-                <div className="player-avatar-ring">
+                <div className="player-avatar-ring rounded-full">
                   <img
                     src={player.avatar}
                     alt={player.name}
-                    width={40}
-                    height={40}
-                    style={{ aspectRatio: "1 / 1", objectFit: "cover" }}
-                    className="player-avatar-img"
+                    width={44}
+                    height={44}
+                    style={{ aspectRatio: "1 / 1", objectFit: "cover", borderRadius: "50%" }}
+                    className="player-avatar-img rounded-full"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/images/ethora-mascot.png";
                     }}

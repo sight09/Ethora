@@ -21,6 +21,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useEthora, DEMO_ACCOUNTS, DemoAccount, RoleType } from "@/context/EthoraContext";
+import { InteractiveAuthMascot } from "@/components/auth/InteractiveAuthMascot";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -109,13 +110,13 @@ export default function SignUpPage() {
       {/* ======================================================== */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <img
-          src="/images/login-bg-hd.jpg"
+          src="/images/login-arena-clean.jpg"
           alt="ETHORA Arena Background"
           className="w-full h-full object-cover object-center"
           style={{ imageRendering: "auto" }}
         />
         {/* Subtle dark tint to maintain contrast */}
-        <div className="absolute inset-0 bg-black/15 pointer-events-none" />
+        <div className="absolute inset-0 bg-black/25 pointer-events-none" />
       </div>
 
       {/* ======================================================== */}
@@ -167,8 +168,8 @@ export default function SignUpPage() {
           {/* LEFT AREA: Native artwork visible, 4 bottom features */}
           {/* ==================================================== */}
           <div className="hidden lg:flex lg:col-span-6 flex-col justify-between self-stretch py-2 min-h-0">
-            {/* Upper space stays clear to frame the mascot and metallic ETHORA logo */}
-            <div className="flex-1" />
+            {/* Interactive moving ETHORA Mascot Emblem */}
+            <InteractiveAuthMascot />
 
             {/* Bottom 4 Feature Items with vertical dividers */}
             <div className="w-full grid grid-cols-4 items-center mb-2">
@@ -242,17 +243,17 @@ export default function SignUpPage() {
           {/* RIGHT AREA: THE GLOWING VIOLET SIGN UP CARD          */}
           {/* ==================================================== */}
           <div className="lg:col-span-6 flex justify-center lg:justify-end w-full">
-            <div className="w-full max-w-[450px] rounded-2xl border border-purple-500/70 bg-[#090616]/92 px-6 py-5 sm:px-8 sm:py-6 shadow-[0_0_50px_rgba(147,51,234,0.35)] backdrop-blur-xl relative overflow-hidden">
+            <div className="w-full max-w-[460px] rounded-2xl border border-[rgba(168,85,247,0.35)] bg-[#14111F] px-6 py-6 sm:px-8 sm:py-7 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-xl relative overflow-hidden font-sans">
               
               {/* Soft purple ambient back-glow inside card */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-purple-600/20 rounded-full blur-[65px] pointer-events-none" />
+              <div className="absolute top-0 right-0 w-44 h-44 bg-[#A855F7]/15 rounded-full blur-[70px] pointer-events-none" />
 
               {/* Card Header */}
-              <div className="text-center mb-4">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                  {activeTab === "register" ? "Join ETHORA!" : "Welcome Back!"}
+              <div className="text-center mb-5">
+                <h1 className="text-[32px] font-[800] text-[#F4F1FF] uppercase tracking-tight leading-none">
+                  {activeTab === "register" ? "Join ETHORA" : "Welcome Back"}
                 </h1>
-                <p className="text-xs text-purple-300/80 mt-1">
+                <p className="text-[13px] font-[400] text-[#7D7896] mt-2">
                   {activeTab === "register"
                     ? "Create your account and enter the arena"
                     : "Sign in to your ETHORA account"}
@@ -260,14 +261,14 @@ export default function SignUpPage() {
               </div>
 
               {/* Dual Tab Switcher: [ 👤 Login ]  [ + Register ] */}
-              <div className="grid grid-cols-2 p-1 rounded-xl bg-[#060410]/90 border border-purple-900/60 mb-3.5">
+              <div className="grid grid-cols-2 p-1 rounded-xl bg-[#0A0A12] border border-[rgba(168,85,247,0.25)] mb-4">
                 <button
                   type="button"
                   onClick={() => setActiveTab("login")}
-                  className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs sm:text-sm font-semibold transition ${
+                  className={`flex items-center justify-center gap-2 py-2 rounded-lg text-[13px] font-[600] transition ${
                     activeTab === "login"
-                      ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-[0_0_14px_rgba(147,51,234,0.4)]"
-                      : "text-purple-300/70 hover:text-white"
+                      ? "bg-[#A855F7] text-[#F4F1FF] shadow-[0_0_14px_rgba(168,85,247,0.4)]"
+                      : "text-[#B8B3CC] hover:text-[#F4F1FF]"
                   }`}
                 >
                   <User className="w-3.5 h-3.5" />
@@ -277,10 +278,10 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("register")}
-                  className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs sm:text-sm font-semibold transition ${
+                  className={`flex items-center justify-center gap-2 py-2 rounded-lg text-[13px] font-[600] transition ${
                     activeTab === "register"
-                      ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-[0_0_14px_rgba(147,51,234,0.4)]"
-                      : "text-purple-300/70 hover:text-white"
+                      ? "bg-[#A855F7] text-[#F4F1FF] shadow-[0_0_14px_rgba(168,85,247,0.4)]"
+                      : "text-[#B8B3CC] hover:text-[#F4F1FF]"
                   }`}
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -292,10 +293,10 @@ export default function SignUpPage() {
               {/* REGISTER TAB FORM (DEFAULT ON SIGNUP)             */}
               {/* ================================================= */}
               {activeTab === "register" && (
-                <form onSubmit={handleRegister} className="space-y-2.5">
-                  <div className="grid grid-cols-2 gap-2">
+                <form onSubmit={handleRegister} className="space-y-3.5">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10.5px] font-medium text-purple-300/80 mb-0.5">
+                      <label className="block text-[13px] font-[600] text-[#B8B3CC] mb-1">
                         Full Name
                       </label>
                       <input
@@ -304,11 +305,11 @@ export default function SignUpPage() {
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
                         placeholder="Dawit Alemu"
-                        className="w-full px-2.5 py-2 rounded-xl border border-purple-900/60 bg-[#060411] text-xs text-white placeholder-purple-300/40 focus:outline-none focus:border-purple-500"
+                        className="w-full px-3 py-2.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#0A0A12] text-[16px] font-[400] text-[#F4F1FF] placeholder-[#7D7896] focus:outline-none focus:border-[#A855F7]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10.5px] font-medium text-purple-300/80 mb-0.5">
+                      <label className="block text-[13px] font-[600] text-[#B8B3CC] mb-1">
                         Gamer Tag
                       </label>
                       <input
@@ -317,13 +318,13 @@ export default function SignUpPage() {
                         value={regTag}
                         onChange={(e) => setRegTag(e.target.value)}
                         placeholder="ShadowStrike"
-                        className="w-full px-2.5 py-2 rounded-xl border border-purple-900/60 bg-[#060411] text-xs text-white placeholder-purple-300/40 focus:outline-none focus:border-purple-500 font-mono"
+                        className="w-full px-3 py-2.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#0A0A12] text-[16px] font-[400] text-[#F4F1FF] placeholder-[#7D7896] focus:outline-none focus:border-[#A855F7]"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[10.5px] font-medium text-purple-300/80 mb-0.5">
+                    <label className="block text-[13px] font-[600] text-[#B8B3CC] mb-1">
                       Email Address
                     </label>
                     <input
@@ -332,22 +333,22 @@ export default function SignUpPage() {
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
                       placeholder="player@ethora.et"
-                      className="w-full px-2.5 py-2 rounded-xl border border-purple-900/60 bg-[#060411] text-xs text-white placeholder-purple-300/40 focus:outline-none focus:border-purple-500"
+                      className="w-full px-3 py-2.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#0A0A12] text-[16px] font-[400] text-[#F4F1FF] placeholder-[#7D7896] focus:outline-none focus:border-[#A855F7]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10.5px] font-medium text-purple-300/80 mb-0.5">
+                    <label className="block text-[13px] font-[600] text-[#B8B3CC] mb-1">
                       Role in Esports
                     </label>
-                    <div className="grid grid-cols-3 gap-1.5">
+                    <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setRegRole("gamer")}
-                        className={`py-1 px-1 rounded-lg text-[11px] font-semibold border transition ${
+                        className={`py-2 px-3 rounded-xl text-[13px] font-[600] border transition ${
                           regRole === "gamer"
-                            ? "bg-purple-600/40 border-purple-400 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]"
-                            : "bg-[#060411] border-purple-900/50 text-purple-300/60"
+                            ? "bg-[#A855F7] border-[#A855F7] text-[#F4F1FF] shadow-[0_0_12px_rgba(168,85,247,0.35)]"
+                            : "bg-[#0A0A12] border-[rgba(168,85,247,0.25)] text-[#7D7896] hover:text-[#B8B3CC]"
                         }`}
                       >
                         Gamer
@@ -355,30 +356,19 @@ export default function SignUpPage() {
                       <button
                         type="button"
                         onClick={() => setRegRole("organizer")}
-                        className={`py-1 px-1 rounded-lg text-[11px] font-semibold border transition ${
+                        className={`py-2 px-3 rounded-xl text-[13px] font-[600] border transition ${
                           regRole === "organizer"
-                            ? "bg-purple-600/40 border-purple-400 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]"
-                            : "bg-[#060411] border-purple-900/50 text-purple-300/60"
+                            ? "bg-[#A855F7] border-[#A855F7] text-[#F4F1FF] shadow-[0_0_12px_rgba(168,85,247,0.35)]"
+                            : "bg-[#0A0A12] border-[rgba(168,85,247,0.25)] text-[#7D7896] hover:text-[#B8B3CC]"
                         }`}
                       >
                         Organizer
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRegRole("organization")}
-                        className={`py-1 px-1 rounded-lg text-[11px] font-semibold border transition ${
-                          regRole === "organization"
-                            ? "bg-purple-600/40 border-purple-400 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]"
-                            : "bg-[#060411] border-purple-900/50 text-purple-300/60"
-                        }`}
-                      >
-                        Team Lead
                       </button>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[10.5px] font-medium text-purple-300/80 mb-0.5">
+                    <label className="block text-[13px] font-[600] text-[#B8B3CC] mb-1">
                       Password
                     </label>
                     <div className="relative">
@@ -387,29 +377,29 @@ export default function SignUpPage() {
                         required
                         value={regPassword}
                         onChange={(e) => setRegPassword(e.target.value)}
-                        placeholder="Create a strong password"
-                        className="w-full pl-3 pr-10 py-2 rounded-xl border border-purple-900/60 bg-[#060411] text-xs text-white placeholder-purple-300/40 focus:outline-none focus:border-purple-500"
+                        placeholder="Create password"
+                        className="w-full pl-3 pr-10 py-2.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#0A0A12] text-[16px] font-[400] text-[#F4F1FF] placeholder-[#7D7896] focus:outline-none focus:border-[#A855F7]"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-purple-400 hover:text-white transition"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#7D7896] hover:text-[#F4F1FF] transition"
                         aria-label="Toggle password visibility"
                       >
                         {showPassword ? (
-                          <EyeOff className="w-3.5 h-3.5" />
+                          <EyeOff className="w-4 h-4" />
                         ) : (
-                          <Eye className="w-3.5 h-3.5" />
+                          <Eye className="w-4 h-4" />
                         )}
                       </button>
                     </div>
                   </div>
 
-                  <div className="pt-1">
+                  <div className="pt-2">
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold text-xs uppercase tracking-wider shadow-[0_0_18px_rgba(147,51,234,0.4)] transition cursor-pointer"
+                      className="w-full py-3 rounded-xl bg-[#A855F7] hover:bg-[#9333EA] text-[#F4F1FF] font-[700] text-[15px] uppercase tracking-wider shadow-[0_0_20px_rgba(168,85,247,0.45)] transition cursor-pointer"
                     >
                       {loading ? (
                         <div className="flex items-center justify-center gap-2">
@@ -417,7 +407,7 @@ export default function SignUpPage() {
                           <span>Creating Account...</span>
                         </div>
                       ) : (
-                        "Create Account >"
+                        "CREATE ACCOUNT →"
                       )}
                     </button>
                   </div>

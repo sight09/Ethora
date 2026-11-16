@@ -53,18 +53,30 @@ export default function OrganizerDashboardPage() {
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* 1. HEADER */}
-      <div className="relative rounded-2xl border border-[#232A42] bg-gradient-to-r from-[#0E111A] via-[#141826] to-[#0E111A] p-6 lg:p-8 overflow-hidden shadow-2xl">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* 1. HEADER (EPIC STADIUM ARENA OPERATIONS BANNER) */}
+      <div className="relative rounded-2xl border border-[rgba(168,85,247,0.35)] bg-[#14111F] p-6 lg:p-8 overflow-hidden shadow-2xl">
+        {/* Background Stadium Arena Banner */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <img
+            src="/images/ethora-stadium-banner.jpg"
+            alt="Esports Arena"
+            className="w-full h-full object-cover object-center opacity-40 filter contrast-125 scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#14111F] via-[#14111F]/80 to-[#14111F]/60 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#14111F] via-transparent to-[#14111F]/50 z-10" />
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#A855F7]/20 rounded-full blur-3xl pointer-events-none z-10" />
+        </div>
+
+        <div className="relative z-20 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#A855F7]/30 bg-[#A855F7]/10 text-[#C084FC] text-xs font-semibold">
               <LayoutDashboard className="w-3.5 h-3.5" />
               Directorate Operations Hub
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-[800] text-[#F4F1FF] font-sans tracking-tight">
               ORGANIZER DASHBOARD
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#B8B3CC] max-w-2xl leading-relaxed font-sans">
               Manage sanctioned esports events, review competitor applications, coordinate interactive brackets, and
               publish official match results.
             </p>
@@ -72,7 +84,7 @@ export default function OrganizerDashboardPage() {
 
           <Link
             href="/organizer/create"
-            className="px-6 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs uppercase tracking-wider shadow-glow-violet transition flex items-center gap-2 shrink-0"
+            className="px-6 py-3.5 rounded-xl bg-[#A855F7] hover:bg-[#9333EA] text-[#F4F1FF] font-bold text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(168,85,247,0.45)] transition flex items-center gap-2 shrink-0 font-sans"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Create New Tournament</span>

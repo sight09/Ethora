@@ -74,17 +74,15 @@ export const EthoraLogo: React.FC<EthoraLogoProps> = ({
       {showWordmark && (
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5 leading-none">
-            {/* MInT Specification: Logo wordmark: Fraunces (serif), 18px, weight 500 */}
-            <span className="font-serif font-medium text-[18px] tracking-wide text-white">
-              ETH<span className="text-violet-400">O</span>RA
+            <span className="font-sans font-extrabold text-[19px] tracking-wider text-[#F4F1FF] uppercase">
+              ETH<span className="text-[#A855F7]">O</span>RA
             </span>
-            <div className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <div className="h-1.5 w-1.5 rounded-full bg-[#A855F7] animate-pulse" />
           </div>
 
           {showTagline && (
             <div className="flex items-center gap-1.5 mt-0.5">
-              {/* MInT Specification: Logo subtitle: Public Sans, 12px, weight 400 */}
-              <span className="font-sans font-normal text-[12px] text-slate-400">
+              <span className="font-sans font-normal text-[12px] text-[#7D7896]">
                 Ethiopia Esports Network
               </span>
               <span className="inline-block w-3 h-[2px] rounded-full ethiopia-flag-stripe" />

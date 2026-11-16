@@ -32,6 +32,7 @@ export const Navbar: React.FC = () => {
   const {
     currentSession,
     setRole,
+    logout,
     currentUser,
     notifications,
     unreadNotificationCount,
@@ -97,11 +98,10 @@ export const Navbar: React.FC = () => {
     { role: "organizer", title: "Lion City Esports", subtitle: "Tournament Organizer", icon: Swords },
     { role: "organization", title: "Great Rift Syndicate", subtitle: "Esports Org Director", icon: Layers },
     { role: "admin", title: "ETHORA Ops Lead", subtitle: "Platform Administrator", icon: ShieldAlert },
-    { role: "guest", title: "Guest Visitor", subtitle: "Public Landing View", icon: Users },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#232A42] bg-[#08090E]/85 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-[rgba(168,85,247,0.25)] bg-[#0A0A12]/90 backdrop-blur-md">
       {/* Subtle top brand glow strip */}
       <div className="h-[2px] w-full ethiopia-flag-stripe opacity-90" />
 
@@ -111,7 +111,7 @@ export const Navbar: React.FC = () => {
           <EthoraLogo size="md" />
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-6">
             {activeNavLinks.map((link) => {
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
               const Icon = link.icon;
@@ -120,16 +120,16 @@ export const Navbar: React.FC = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative px-3.5 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  className={`relative py-1 text-[15px] transition-all flex items-center gap-2 ${
                     isActive
-                      ? "text-white bg-violet-500/10 border border-violet-500/30 text-shadow"
-                      : "text-slate-300 hover:text-white hover:bg-slate-800/40"
-                  } ${link.highlight ? "bg-violet-600 hover:bg-violet-500 text-white shadow-glow-violet" : ""}`}
+                      ? "text-[#F4F1FF] font-[600] border-b-2 border-[#A855F7]"
+                      : "text-[#B8B3CC] font-[500] hover:text-[#F4F1FF]"
+                  } ${link.highlight ? "px-3 py-1.5 rounded-lg bg-[#A855F7] hover:bg-[#9333EA] text-[#F4F1FF] font-[600] border-b-0 uppercase" : ""}`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? "text-violet-400" : "text-slate-400"}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? "text-[#A855F7]" : "text-[#7D7896]"}`} />
                   <span>{link.label}</span>
                   {link.badge && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white animate-pulse">
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#A855F7] text-white animate-pulse">
                       {link.badge}
                     </span>
                   )}
@@ -271,18 +271,18 @@ export const Navbar: React.FC = () => {
 
           {/* Profile / Auth Button */}
           {isGuest ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Link
                 href="/auth/signin"
-                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition"
+                className="text-[15px] font-[500] text-[#B8B3CC] hover:text-[#F4F1FF] px-2 py-1 transition"
               >
                 Sign In
               </Link>
               <Link
                 href="/auth/signup"
-                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-violet-600 hover:bg-violet-500 text-white shadow-glow-violet transition"
+                className="px-4 py-2 text-[15px] font-[600] rounded-lg bg-[#A855F7] hover:bg-[#9333EA] text-[#F4F1FF] uppercase tracking-wide shadow-[0_0_15px_rgba(168,85,247,0.4)] transition"
               >
-                Join ETHORA
+                Get Started
               </Link>
             </div>
           ) : (
@@ -348,13 +348,13 @@ export const Navbar: React.FC = () => {
 
                     <button
                       onClick={() => {
-                        setRole("guest");
+                        logout();
                         setUserDropdownOpen(false);
                       }}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-950/20 hover:text-rose-300 transition"
                     >
                       <LogOut className="w-4 h-4 text-rose-400" />
-                      <span>Log Out (Switch to Guest)</span>
+                      <span>Sign Out</span>
                     </button>
                   </div>
                 </div>

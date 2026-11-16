@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Trophy,
   Users,
@@ -44,6 +44,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenAIChat,
 }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const {
     currentSession,
     setRole,
@@ -67,7 +68,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { role: "organizer", title: "Lion City Esports", subtitle: "Tournament Organizer", icon: Swords },
     { role: "organization", title: "Great Rift Syndicate", subtitle: "Esports Org Director", icon: Layers },
     { role: "admin", title: "ETHORA Ops Lead", subtitle: "Platform Administrator", icon: ShieldAlert },
-    { role: "guest", title: "Guest Visitor", subtitle: "Public Landing View", icon: Users },
   ];
 
   interface NavItem {
@@ -114,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // RENDER COLLAPSED VIEW (w-20, Logo triggers Expand)
   // ==========================================
   const renderCollapsedContent = () => (
-    <div className="flex flex-col h-full bg-[#0A0D15] border-r border-[#232A42] text-slate-200 select-none items-center py-4 justify-between w-20">
+    <div className="flex flex-col h-full bg-[#14111F] border-r border-[rgba(168,85,247,0.25)] text-[#B8B3CC] select-none items-center py-4 justify-between w-20">
       {/* Top: LOGO ICON AS COLLAPSE/EXPAND TOGGLE BUTTON */}
       <div className="flex flex-col items-center gap-4 w-full">
         <div className="relative group">
@@ -125,13 +125,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             aria-label="Expand sidebar"
           >
             <EthoraEmblem size="md" />
-            <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-violet-600 border-2 border-[#0A0D15] flex items-center justify-center text-[9px] font-bold text-white shadow">
+            <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#A855F7] border-2 border-[#14111F] flex items-center justify-center text-[9px] font-bold text-white shadow">
               <ChevronRight className="w-2.5 h-2.5" />
             </span>
           </button>
 
           {/* Hover Tooltip */}
-          <div className="absolute left-full ml-3 top-1 px-3 py-1.5 rounded-lg bg-[#0E111A] border border-[#232A42] text-white text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
+          <div className="absolute left-full ml-3 top-1 px-3 py-1.5 rounded-lg bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#F4F1FF] text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
             Click logo to expand sidebar
           </div>
         </div>
@@ -147,15 +147,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div key={item.href} className="relative group flex justify-center w-full">
               <Link
                 href={item.href}
-                className={`p-3 rounded-xl transition relative flex items-center justify-center ${
-                  isActive
-                    ? "bg-violet-600/30 text-white border border-violet-500/50 shadow-glow-violet"
-                    : "text-slate-400 hover:text-white hover:bg-[#141826]"
-                } ${item.highlight ? "bg-violet-600 text-white shadow-glow-violet" : ""}`}
+                className={`p-3 rounded-xl transition relative flex items-center justify-center ${isActive
+                  ? "bg-[#A855F7]/20 text-[#F4F1FF] border-l-[3px] border-[#A855F7] shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+                  : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
+                  } ${item.highlight ? "bg-[#A855F7] text-white shadow-[0_0_15px_rgba(168,85,247,0.5)]" : ""}`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? "text-violet-300" : ""}`} />
+                <Icon className={`w-5 h-5 ${isActive ? "text-[#A855F7]" : ""}`} />
                 {item.badge && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A855F7] animate-pulse" />
                 )}
               </Link>
 
@@ -253,11 +252,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       setRole(item.role);
                       setRoleMenuOpen(false);
                     }}
-                    className={`w-full text-left p-2 rounded-lg flex items-center gap-2.5 transition ${
-                      isSelected
-                        ? "bg-violet-600 text-white font-bold"
-                        : "hover:bg-[#141826] text-slate-300"
-                    }`}
+                    className={`w-full text-left p-2 rounded-lg flex items-center gap-2.5 transition ${isSelected
+                      ? "bg-violet-600 text-white font-bold"
+                      : "hover:bg-[#141826] text-slate-300"
+                      }`}
                   >
                     <RoleIcon className="w-3.5 h-3.5 shrink-0" />
                     <div className="min-w-0 flex-1">
@@ -281,6 +279,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => {
                       logout();
                       setRoleMenuOpen(false);
+                      router.push("/");
                     }}
                     className="p-1.5 text-[11px] text-red-400 hover:text-red-300 flex items-center gap-1.5 rounded-lg hover:bg-[#141826] transition"
                   >
@@ -303,9 +302,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // RENDER EXPANDED VIEW (w-64, Logo triggers Collapse)
   // ==========================================
   const renderExpandedContent = () => (
-    <div className="flex flex-col h-full bg-[#0A0D15] border-r border-[#232A42] text-slate-200 select-none">
+    <div className="flex flex-col h-full bg-[#14111F] border-r border-[rgba(168,85,247,0.25)] text-[#B8B3CC] select-none font-sans">
       {/* 1. BRAND HEADER: CLICKING LOGO OR COLLAPSE BUTTON COLLAPSES SIDEBAR */}
-      <div className="p-4 border-b border-[#232A42] flex items-center justify-between group">
+      <div className="p-4 border-b border-[rgba(168,85,247,0.25)] flex items-center justify-between group">
         <button
           onClick={onToggleCollapse}
           className="flex items-center gap-2.5 text-left transition hover:opacity-90 focus:outline-none"
@@ -322,20 +321,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {onToggleCollapse && (
           <button
             onClick={onToggleCollapse}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#141826] transition border border-[#232A42]"
+            className="p-1.5 rounded-lg text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/15 transition border border-[rgba(168,85,247,0.25)]"
             title="Collapse Sidebar"
           >
-            <ChevronLeft className="w-4 h-4 text-violet-400" />
+            <ChevronLeft className="w-4 h-4 text-[#A855F7]" />
           </button>
         )}
       </div>
 
       {/* 2. NAVIGATION SECTIONS */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 font-sans">
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {/* Competitions */}
         <div className="space-y-1">
-          {/* MInT Spec: Section label: Public Sans, 13px, weight 400, sentence case */}
-          <span className="px-3 text-[13px] font-normal text-slate-400 block mb-1">
+          <span className="px-3 text-[12px] font-[600] text-[#7D7896] uppercase tracking-[0.2em] block mb-1.5">
             Competitions
           </span>
           {mainNav.map((item) => {
@@ -346,18 +344,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl text-[15px] transition ${
-                  isActive
-                    ? "font-medium text-white bg-violet-600/20 border-l-2 border-violet-400 shadow-glow-violet"
-                    : "font-normal text-slate-300 hover:text-white hover:bg-[#141826]"
-                }`}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-[15px] transition ${isActive
+                  ? "font-[600] text-[#F4F1FF] bg-[#A855F7]/15 border-l-[3px] border-[#A855F7] shadow-[0_0_12px_rgba(168,85,247,0.35)]"
+                  : "font-[500] text-[#B8B3CC] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
+                  }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <Icon className={`w-[18px] h-[18px] ${isActive ? "text-violet-400" : "text-slate-400"}`} strokeWidth={1.75} />
+                  <Icon className={`w-[18px] h-[18px] ${isActive ? "text-[#A855F7]" : "text-[#7D7896]"}`} strokeWidth={1.75} />
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
-                  <span className="px-1.5 py-0.5 text-[11px] font-medium rounded-full bg-violet-600/40 text-violet-300 border border-violet-500/30">
+                  <span className="px-2 py-0.5 text-[11px] font-[600] rounded-full bg-[#A855F7]/30 text-[#F4F1FF] border border-[#A855F7]/40">
                     {item.badge}
                   </span>
                 )}
@@ -368,8 +365,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {currentSession.role === "gamer" && (
           <div className="space-y-1">
-            <span className="px-3 text-[13px] font-normal text-slate-400 block mb-1">
-              My arena
+            <span className="px-3 text-[12px] font-[600] text-[#7D7896] uppercase tracking-[0.2em] block mb-1.5">
+              My Arena
             </span>
             {gamerNav.map((item) => {
               const isActive = pathname === item.href;
@@ -379,14 +376,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-[15px] transition ${
-                    isActive
-                      ? "font-medium text-white bg-violet-600/20 border-l-2 border-violet-400"
-                      : "font-normal text-slate-300 hover:text-white hover:bg-[#141826]"
-                  }`}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-[15px] transition ${isActive
+                    ? "font-[600] text-[#F4F1FF] bg-[#A855F7]/15 border-l-[3px] border-[#A855F7]"
+                    : "font-[500] text-[#B8B3CC] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Icon className="w-[18px] h-[18px] text-violet-400" strokeWidth={1.75} />
+                    <Icon className={`w-[18px] h-[18px] ${isActive ? "text-[#A855F7]" : "text-[#7D7896]"}`} strokeWidth={1.75} />
                     <span>{item.label}</span>
                   </div>
                 </Link>
@@ -397,8 +393,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {isOrganizer && (
           <div className="space-y-1">
-            <span className="px-3 text-[13px] font-normal text-slate-400 block mb-1">
-              Organizer suite
+            <span className="px-3 text-[12px] font-[600] text-[#7D7896] uppercase tracking-[0.2em] block mb-1.5">
+              Organizer Suite
             </span>
             {organizerNav.map((item) => {
               const isActive = pathname === item.href;
@@ -408,16 +404,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-[15px] transition ${
-                    item.highlight
-                      ? "bg-violet-600 hover:bg-violet-500 text-white shadow-glow-violet font-medium"
-                      : isActive
-                      ? "font-medium text-white bg-violet-600/20 border-l-2 border-violet-400"
-                      : "font-normal text-slate-300 hover:text-white hover:bg-[#141826]"
-                  }`}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-[15px] transition ${item.highlight
+                    ? "bg-[#A855F7] hover:bg-[#9333EA] text-[#F4F1FF] shadow-[0_0_15px_rgba(168,85,247,0.5)] font-[600] uppercase"
+                    : isActive
+                      ? "font-[600] text-[#F4F1FF] bg-[#A855F7]/15 border-l-[3px] border-[#A855F7]"
+                      : "font-[500] text-[#B8B3CC] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />
+                    <Icon className={`w-[18px] h-[18px] ${isActive ? "text-[#A855F7]" : "text-[#7D7896]"}`} strokeWidth={1.75} />
                     <span>{item.label}</span>
                   </div>
                 </Link>
@@ -428,7 +423,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {isAdmin && (
           <div className="space-y-1">
-            <span className="px-3 text-[13px] font-normal text-rose-400 block mb-1">
+            <span className="px-3 text-[12px] font-[600] text-[#7D7896] uppercase tracking-[0.2em] block mb-1.5">
               Administration
             </span>
             {adminNav.map((item) => {
@@ -439,14 +434,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-3 py-2 rounded-xl text-[15px] transition ${
-                    isActive
-                      ? "font-medium text-rose-300 bg-rose-950/40 border-l-2 border-rose-500"
-                      : "font-normal text-slate-300 hover:text-white hover:bg-[#141826]"
-                  }`}
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-[15px] transition ${isActive
+                    ? "font-[600] text-[#F4F1FF] bg-rose-950/40 border-l-[3px] border-rose-500"
+                    : "font-[500] text-[#B8B3CC] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
+                    }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <Icon className="w-[18px] h-[18px] text-rose-400" strokeWidth={1.75} />
+                    <Icon className={`w-[18px] h-[18px] ${isActive ? "text-rose-400" : "text-[#7D7896]"}`} strokeWidth={1.75} />
                     <span>{item.label}</span>
                   </div>
                 </Link>
@@ -456,7 +450,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         <div className="space-y-1">
-          <span className="px-3 text-[13px] font-normal text-slate-400 block mb-1">
+          <span className="px-3 text-[12px] font-[600] text-[#7D7896] uppercase tracking-[0.2em] block mb-1.5">
             Community
           </span>
           {communityNav.map((item) => {
@@ -467,14 +461,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl text-[15px] transition ${
-                  isActive
-                    ? "font-medium text-white bg-violet-600/20 border-l-2 border-violet-400"
-                    : "font-normal text-slate-300 hover:text-white hover:bg-[#141826]"
-                }`}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-[15px] transition ${isActive
+                  ? "font-[600] text-[#F4F1FF] bg-[#A855F7]/15 border-l-[3px] border-[#A855F7]"
+                  : "font-[500] text-[#B8B3CC] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
+                  }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <Icon className={`w-[18px] h-[18px] ${isActive ? "text-violet-400" : "text-slate-400"}`} strokeWidth={1.75} />
+                  <Icon className={`w-[18px] h-[18px] ${isActive ? "text-[#A855F7]" : "text-[#7D7896]"}`} strokeWidth={1.75} />
                   <span>{item.label}</span>
                 </div>
               </Link>
@@ -515,11 +508,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     setRoleMenuOpen(false);
                     setMobileOpen(false);
                   }}
-                  className={`w-full text-left p-2 rounded-lg flex items-center gap-2.5 transition ${
-                    isSelected
-                      ? "bg-violet-600 text-white font-bold"
-                      : "hover:bg-[#141826] text-slate-300"
-                  }`}
+                  className={`w-full text-left p-2 rounded-lg flex items-center gap-2.5 transition ${isSelected
+                    ? "bg-violet-600 text-white font-bold"
+                    : "hover:bg-[#141826] text-slate-300"
+                    }`}
                 >
                   <RoleIcon className="w-3.5 h-3.5 shrink-0" />
                   <div className="min-w-0 flex-1">
@@ -547,6 +539,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     logout();
                     setRoleMenuOpen(false);
                     setMobileOpen(false);
+                    router.push("/");
                   }}
                   className="p-1.5 text-xs text-red-400 hover:text-red-300 flex items-center gap-1.5 rounded-lg hover:bg-[#141826] transition font-medium"
                 >
@@ -615,9 +608,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       {/* 1. DESKTOP SIDEBAR (Collapsed or Expanded) */}
       <aside
-        className={`hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col shadow-2xl transition-all duration-300 ${
-          isCollapsed ? "w-20" : "w-64"
-        }`}
+        className={`hidden lg:flex fixed left-0 top-0 bottom-0 z-40 flex-col shadow-2xl transition-all duration-300 ${isCollapsed ? "w-20" : "w-64"
+          }`}
       >
         {isCollapsed ? renderCollapsedContent() : renderExpandedContent()}
       </aside>

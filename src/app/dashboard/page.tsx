@@ -34,6 +34,7 @@ import {
 import { useEthora } from "@/context/EthoraContext";
 import { formatETB, formatNumber, getRankTier } from "@/lib/utils";
 import { SUPPORTED_GAMES } from "@/data/games";
+import { GamerDashboardHeader } from "@/components/dashboard/GamerDashboardHeader";
 
 export default function GamerDashboardPage() {
   const { currentUser, tournaments, connectGameAccount } = useEthora();
@@ -147,157 +148,15 @@ export default function GamerDashboardPage() {
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
-      {/* =========================================================================
-          1. HERO PASSPORT & TIER PROMOTION COMMAND (Asymmetrical, Dynamic, Rich)
-          ========================================================================= */}
-      <div className="relative rounded-3xl border border-[#232A42] bg-gradient-to-br from-[#0E111A] via-[#141826] to-[#0A0D15] p-6 lg:p-8 overflow-hidden shadow-2xl">
-        {/* Ambient atmospheric glow */}
-        <div className="absolute top-0 right-1/4 w-[500px] h-64 bg-violet-600/15 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-8">
-          {/* Athlete Portrait & Identity */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-            <div className="relative shrink-0">
-              {/* Outer Glowing Tier Frame */}
-              <div className="relative p-1 rounded-2xl bg-gradient-to-tr from-violet-600 via-cyan-400 to-amber-400 shadow-glow-violet">
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.gamerTag}
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover"
-                />
-              </div>
-
-              {currentUser.verified && (
-                <div
-                  className="absolute -bottom-1 -right-1 p-1 rounded-full bg-emerald-500 text-white shadow-lg border-2 border-[#0A0D15]"
-                  title="Verified Ethiopian Esports Athlete"
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="font-sans font-semibold text-[24px] sm:text-[28px] text-white tracking-tight leading-none">
-                  {currentUser.gamerTag}
-                </h1>
-
-                {/* Interactive Copyable Ethora Passport ID Chip */}
-                <button
-                  onClick={handleCopyId}
-                  className="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-medium bg-violet-950/80 hover:bg-violet-900 text-violet-300 border border-violet-600/40 transition flex items-center gap-1.5"
-                  title="Click to copy Passport ID"
-                >
-                  <span>{currentUser.ethoraId}</span>
-                  <span className="text-[10px] text-violet-400 opacity-70">
-                    {copiedId ? "✓ Copied" : "Copy"}
-                  </span>
-                </button>
-
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Verified Athlete
-                </span>
-              </div>
-
-              <p className="text-[14px] font-normal text-slate-300">{currentUser.realName}</p>
-
-              <div className="flex items-center gap-3 text-[13px] font-normal text-slate-400 pt-1 flex-wrap">
-                <span className="flex items-center gap-1.5 text-slate-300">
-                  <MapPin className="w-3.5 h-3.5 text-cyan-400" />
-                  {currentUser.location.communityName} • {currentUser.location.woredaName},{" "}
-                  {currentUser.location.regionName}
-                </span>
-                <span className="inline-block w-4 h-2 rounded-sm ethiopia-flag-stripe" />
-                {currentUser.team && (
-                  <span className="flex items-center gap-1.5 text-violet-300 font-medium">
-                    <Layers className="w-3.5 h-3.5 text-violet-400" />
-                    {currentUser.team.name} ({currentUser.team.role})
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Center/Right: Interactive ELO Ladder & Standing Pod */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-            {/* ELO Tier Progression Meter */}
-            <div className="p-4 rounded-2xl border border-[#232A42] bg-[#0A0D15]/80 backdrop-blur-md min-w-[260px] space-y-2.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
-                  <span className="text-[12px] font-semibold text-white uppercase tracking-wider">
-                    {rankInfo.tier}
-                  </span>
-                </div>
-                <span className="text-[11px] font-medium text-emerald-400">Top 0.8%</span>
-              </div>
-
-              {/* Segmented Progress Track */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-violet-300 font-bold">{currentUser.ratingPoints} MMR</span>
-                  <span className="text-slate-400">Next: 3,000 MMR</span>
-                </div>
-                <div className="h-2 w-full bg-[#141826] rounded-full overflow-hidden p-0.5 border border-[#232A42]">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-violet-600 via-cyan-400 to-emerald-400 transition-all duration-1000 shadow-glow-cyan"
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        Math.round(((currentUser.ratingPoints - 2000) / 1000) * 100)
-                      )}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
-                <span className="text-emerald-400 flex items-center gap-1">
-                  ▲ +140 pts this season
-                </span>
-                <span className="text-slate-400 font-mono">160 pts to Grandmaster</span>
-              </div>
-            </div>
-
-            {/* Standing Pod */}
-            <div className="flex items-center gap-3">
-              {/* National Ranking Pill */}
-              <div className="p-4 rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-[#0A0D15] text-center min-w-[120px]">
-                <span className="text-[11px] font-normal text-amber-300 block">National</span>
-                <div className="flex items-center justify-center gap-1 my-0.5">
-                  <Crown className="w-4 h-4 text-amber-400" />
-                  <span className="text-[26px] font-bold text-white leading-none">
-                    #{currentUser.nationalRank}
-                  </span>
-                </div>
-                <span className="text-[10px] text-emerald-400 font-medium">▲ +2 positions</span>
-              </div>
-
-              {/* Regional Ranking Pill */}
-              <div className="p-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-b from-cyan-500/10 to-[#0A0D15] text-center min-w-[120px]">
-                <span className="text-[11px] font-normal text-cyan-300 block">Addis Ababa</span>
-                <div className="flex items-center justify-center gap-1 my-0.5">
-                  <Trophy className="w-4 h-4 text-cyan-400" />
-                  <span className="text-[26px] font-bold text-cyan-300 leading-none">
-                    #{currentUser.regionalRank}
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-400 font-medium">Leader</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* 1. HERO PASSPORT & TIER PROMOTION COMMAND (Image 3 Spec) */}
+      <GamerDashboardHeader currentUser={currentUser} />
 
       {/* =========================================================================
           2. ASYMMETRICAL INTERACTIVE BENTO MATRIX (Varied, Visual, Not Same Boxes)
           ========================================================================= */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
         {/* TILE 1: INTERACTIVE RATING VELOCITY AREA CHART (Spans 6 cols on lg) */}
-        <div className="lg:col-span-6 rounded-3xl border border-[#232A42] bg-[#0E111A] p-5 flex flex-col justify-between space-y-4 shadow-xl relative overflow-hidden">
+        <div className="lg:col-span-6 rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-5 flex flex-col justify-between space-y-4 shadow-xl relative overflow-hidden">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
@@ -310,16 +169,15 @@ export default function GamerDashboardPage() {
             </div>
 
             {/* Time period filter pills */}
-            <div className="flex items-center bg-[#141826] p-1 rounded-xl border border-[#232A42] text-[11px] font-medium">
+            <div className="flex items-center bg-[#141826] p-1 rounded-xl border border-[rgba(168,85,247,0.25)] text-[11px] font-medium">
               {(["7d", "30d", "season"] as const).map((p) => (
                 <button
                   key={p}
                   onClick={() => setChartPeriod(p)}
-                  className={`px-2.5 py-1 rounded-lg transition uppercase ${
-                    chartPeriod === p
-                      ? "bg-violet-600 text-white font-semibold"
-                      : "text-slate-400 hover:text-white"
-                  }`}
+                  className={`px-2.5 py-1 rounded-lg transition uppercase ${chartPeriod === p
+                    ? "bg-violet-600 text-white font-semibold"
+                    : "text-slate-400 hover:text-white"
+                    }`}
                 >
                   {p}
                 </button>
@@ -414,7 +272,7 @@ export default function GamerDashboardPage() {
           </div>
 
           {/* Bottom stats summary */}
-          <div className="pt-2 border-t border-[#232A42] flex items-center justify-between text-[12px] text-slate-400">
+          <div className="pt-2 border-t border-[rgba(168,85,247,0.25)] flex items-center justify-between text-[12px] text-slate-400">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-violet-400" />
               Peak: <strong className="text-white font-mono">2,840 pts</strong>
@@ -427,7 +285,7 @@ export default function GamerDashboardPage() {
         </div>
 
         {/* TILE 2: WIN/LOSS CIRCULAR DONUT GAUGE (Spans 3 cols on lg) */}
-        <div className="lg:col-span-3 rounded-3xl border border-[#232A42] bg-[#0E111A] p-5 flex flex-col justify-between space-y-3 shadow-xl">
+        <div className="lg:col-span-3 rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-5 flex flex-col justify-between space-y-3 shadow-xl">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <h3 className="font-sans text-[16px] font-semibold text-white">Win Ratio</h3>
@@ -456,9 +314,8 @@ export default function GamerDashboardPage() {
                 fill="none"
                 stroke="url(#winGradient)"
                 strokeWidth="10"
-                strokeDasharray={`${2 * Math.PI * 40 * (currentUser.stats.winRate / 100)} ${
-                  2 * Math.PI * 40 * (1 - currentUser.stats.winRate / 100)
-                }`}
+                strokeDasharray={`${2 * Math.PI * 40 * (currentUser.stats.winRate / 100)} ${2 * Math.PI * 40 * (1 - currentUser.stats.winRate / 100)
+                  }`}
                 strokeLinecap="round"
                 className="transition-all duration-1000 ease-out"
               />
@@ -492,7 +349,7 @@ export default function GamerDashboardPage() {
         </div>
 
         {/* TILE 3: COMBAT FORM & K/D ACCURACY (Spans 3 cols on lg) */}
-        <div className="lg:col-span-3 rounded-3xl border border-[#232A42] bg-[#0E111A] p-5 flex flex-col justify-between space-y-4 shadow-xl">
+        <div className="lg:col-span-3 rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-5 flex flex-col justify-between space-y-4 shadow-xl">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <h3 className="font-sans text-[16px] font-semibold text-white">Recent Form</h3>
@@ -513,11 +370,10 @@ export default function GamerDashboardPage() {
               ].map((m, idx) => (
                 <div key={idx} className="flex-1 text-center">
                   <span
-                    className={`w-full py-1.5 rounded-lg flex items-center justify-center font-bold text-xs ${
-                      m.res === "W"
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                        : "bg-rose-500/20 text-rose-400 border border-rose-500/40"
-                    }`}
+                    className={`w-full py-1.5 rounded-lg flex items-center justify-center font-bold text-xs ${m.res === "W"
+                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                      : "bg-rose-500/20 text-rose-400 border border-rose-500/40"
+                      }`}
                   >
                     {m.res}
                   </span>
@@ -528,7 +384,7 @@ export default function GamerDashboardPage() {
           </div>
 
           {/* Kill / Death Visual Ratio Slider */}
-          <div className="space-y-1.5 pt-2 border-t border-[#232A42]">
+          <div className="space-y-1.5 pt-2 border-t border-[rgba(168,85,247,0.25)]">
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-400">K/D Kill Spread:</span>
               <span className="font-mono font-bold text-cyan-300">1.84 K/D</span>
@@ -540,7 +396,7 @@ export default function GamerDashboardPage() {
           </div>
 
           {/* Total Purses */}
-          <div className="pt-2 border-t border-[#232A42] flex items-center justify-between">
+          <div className="pt-2 border-t border-[rgba(168,85,247,0.25)] flex items-center justify-between">
             <div className="space-y-0.5">
               <span className="text-[11px] text-slate-400 block">Total Earnings Won</span>
               <span className="font-sans text-[18px] font-bold text-amber-400 leading-none">
@@ -555,7 +411,7 @@ export default function GamerDashboardPage() {
       {/* =========================================================================
           3. INTERACTIVE GAME PERFORMANCE STUDIO (Tabbed Showcase, Attribute Meters)
           ========================================================================= */}
-      <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 lg:p-7 space-y-6 shadow-2xl">
+      <div className="rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 lg:p-7 space-y-6 shadow-2xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="font-sans text-[18px] font-semibold text-white flex items-center gap-2">
@@ -573,11 +429,10 @@ export default function GamerDashboardPage() {
               <button
                 key={gameAcc.gameId}
                 onClick={() => setActiveGameTab(gameAcc.gameId)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-2 ${
-                  activeGameTab === gameAcc.gameId
-                    ? "bg-violet-600 text-white shadow-glow-violet border border-violet-500"
-                    : "bg-[#141826] text-slate-300 border border-[#232A42] hover:bg-[#1C2237]"
-                }`}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-2 ${activeGameTab === gameAcc.gameId
+                  ? "bg-violet-600 text-white shadow-glow-violet border border-violet-500"
+                  : "bg-[#141826] text-slate-300 border border-[rgba(168,85,247,0.25)] hover:bg-[#1C2237]"
+                  }`}
               >
                 <Gamepad2 className="w-3.5 h-3.5" />
                 <span>{gameAcc.gameName}</span>
@@ -596,7 +451,7 @@ export default function GamerDashboardPage() {
 
         {/* Active Game Detail Showcase Banner */}
         {activeGame && (
-          <div className="rounded-2xl border border-[#232A42] bg-gradient-to-r from-[#141826] via-[#101422] to-[#0A0D15] p-5 lg:p-6 space-y-6 relative overflow-hidden">
+          <div className="rounded-2xl border border-[rgba(168,85,247,0.25)] bg-gradient-to-r from-[#141826] via-[#101422] to-[#0A0D15] p-5 lg:p-6 space-y-6 relative overflow-hidden">
             {/* Top Game Meta Row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
               <div className="flex items-center gap-4">
@@ -638,7 +493,7 @@ export default function GamerDashboardPage() {
             {/* 4 Visual Attribute Progress Meters */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
               {/* Combat Rating (ACS) */}
-              <div className="p-4 rounded-xl bg-[#0E111A] border border-[#232A42] space-y-2">
+              <div className="p-4 rounded-xl bg-[#14111F] border border-[rgba(168,85,247,0.25)] space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">Combat Score (ACS)</span>
                   <span className="font-mono font-bold text-cyan-300">285 ACS</span>
@@ -650,7 +505,7 @@ export default function GamerDashboardPage() {
               </div>
 
               {/* Headshot Accuracy */}
-              <div className="p-4 rounded-xl bg-[#0E111A] border border-[#232A42] space-y-2">
+              <div className="p-4 rounded-xl bg-[#14111F] border border-[rgba(168,85,247,0.25)] space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">Headshot Accuracy</span>
                   <span className="font-mono font-bold text-violet-300">42.4%</span>
@@ -662,7 +517,7 @@ export default function GamerDashboardPage() {
               </div>
 
               {/* Clutch Win Rate */}
-              <div className="p-4 rounded-xl bg-[#0E111A] border border-[#232A42] space-y-2">
+              <div className="p-4 rounded-xl bg-[#14111F] border border-[rgba(168,85,247,0.25)] space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">1vX Clutch Win</span>
                   <span className="font-mono font-bold text-emerald-400">78.0%</span>
@@ -674,7 +529,7 @@ export default function GamerDashboardPage() {
               </div>
 
               {/* First Blood Impact */}
-              <div className="p-4 rounded-xl bg-[#0E111A] border border-[#232A42] space-y-2">
+              <div className="p-4 rounded-xl bg-[#14111F] border border-[rgba(168,85,247,0.25)] space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">First Blood / Round</span>
                   <span className="font-mono font-bold text-amber-400">1.42 / round</span>
@@ -697,7 +552,7 @@ export default function GamerDashboardPage() {
         {/* LEFT 8 COLUMNS */}
         <div className="lg:col-span-8 space-y-8">
           {/* TOURNAMENT PASSES & LIVE SCHEDULE (Ticket Style) */}
-          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-5 shadow-2xl">
+          <div className="rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-sans text-[16px] font-semibold text-white flex items-center gap-2">
@@ -719,7 +574,7 @@ export default function GamerDashboardPage() {
             </div>
 
             {userRegisteredTournaments.length === 0 ? (
-              <div className="py-10 text-center border border-dashed border-[#232A42] rounded-2xl p-6">
+              <div className="py-10 text-center border border-dashed border-[rgba(168,85,247,0.25)] rounded-2xl p-6">
                 <AlertCircle className="w-8 h-8 text-slate-500 mx-auto mb-2" />
                 <p className="text-sm font-semibold text-slate-300">No active tournament registrations yet</p>
                 <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
@@ -742,7 +597,7 @@ export default function GamerDashboardPage() {
                   return (
                     <div
                       key={t.id}
-                      className="group rounded-2xl border border-[#232A42] bg-[#141826] overflow-hidden hover:border-violet-500/50 transition-all flex flex-col sm:flex-row items-stretch"
+                      className="group rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#141826] overflow-hidden hover:border-violet-500/50 transition-all flex flex-col sm:flex-row items-stretch"
                     >
                       {/* Left Banner Artwork */}
                       <div className="relative w-full sm:w-48 h-32 sm:h-auto shrink-0 bg-slate-900 overflow-hidden">
@@ -764,13 +619,12 @@ export default function GamerDashboardPage() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span
-                              className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-                                isApproved
-                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                  : isPending
+                              className={`px-2 py-0.5 rounded text-[11px] font-semibold ${isApproved
+                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                : isPending
                                   ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
                                   : "bg-slate-800 text-slate-400"
-                              }`}
+                                }`}
                             >
                               Check-in: {reg?.status?.toUpperCase()}
                             </span>
@@ -795,7 +649,7 @@ export default function GamerDashboardPage() {
                           </p>
                         </div>
 
-                        <div className="pt-2 border-t border-[#232A42] flex items-center justify-between">
+                        <div className="pt-2 border-t border-[rgba(168,85,247,0.25)] flex items-center justify-between">
                           <div className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-medium">
                             <Clock className="w-3.5 h-3.5" />
                             <span>Match Lobby opens in 2d 14h</span>
@@ -818,7 +672,7 @@ export default function GamerDashboardPage() {
           </div>
 
           {/* VERIFIED MATCH HISTORY TIMELINE (With Filter Controls) */}
-          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-5 shadow-2xl">
+          <div className="rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 space-y-5 shadow-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="font-sans text-[16px] font-semibold text-white flex items-center gap-2">
@@ -831,28 +685,25 @@ export default function GamerDashboardPage() {
               </div>
 
               {/* Match Filter Tabs */}
-              <div className="flex items-center bg-[#141826] p-1 rounded-xl border border-[#232A42] text-[11px] font-medium">
+              <div className="flex items-center bg-[#141826] p-1 rounded-xl border border-[rgba(168,85,247,0.25)] text-[11px] font-medium">
                 <button
                   onClick={() => setMatchFilter("all")}
-                  className={`px-3 py-1 rounded-lg transition ${
-                    matchFilter === "all" ? "bg-violet-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
+                  className={`px-3 py-1 rounded-lg transition ${matchFilter === "all" ? "bg-violet-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
                 >
                   All ({currentUser.matchHistory.length})
                 </button>
                 <button
                   onClick={() => setMatchFilter("win")}
-                  className={`px-3 py-1 rounded-lg transition ${
-                    matchFilter === "win" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
+                  className={`px-3 py-1 rounded-lg transition ${matchFilter === "win" ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
                 >
                   Victories ({currentUser.matchHistory.filter((m) => m.result === "win").length})
                 </button>
                 <button
                   onClick={() => setMatchFilter("loss")}
-                  className={`px-3 py-1 rounded-lg transition ${
-                    matchFilter === "loss" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
+                  className={`px-3 py-1 rounded-lg transition ${matchFilter === "loss" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
                 >
                   Defeats ({currentUser.matchHistory.filter((m) => m.result === "loss").length})
                 </button>
@@ -866,15 +717,14 @@ export default function GamerDashboardPage() {
                 return (
                   <div
                     key={m.id}
-                    className="p-4 rounded-2xl border border-[#232A42] bg-[#141826] hover:border-[#3A456B] transition flex items-center justify-between gap-4"
+                    className="p-4 rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#141826] hover:border-[#3A456B] transition flex items-center justify-between gap-4"
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <span
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                          isWin
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                            : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                        }`}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${isWin
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                          }`}
                       >
                         {isWin ? "WIN" : "LOSS"}
                       </span>
@@ -890,9 +740,8 @@ export default function GamerDashboardPage() {
                     <div className="text-right shrink-0">
                       <span className="font-mono font-bold text-[15px] text-white block">{m.score}</span>
                       <span
-                        className={`text-[11px] font-mono font-medium ${
-                          m.ratingChange > 0 ? "text-emerald-400" : "text-rose-400"
-                        }`}
+                        className={`text-[11px] font-mono font-medium ${m.ratingChange > 0 ? "text-emerald-400" : "text-rose-400"
+                          }`}
                       >
                         {m.ratingChange > 0 ? `+${m.ratingChange}` : m.ratingChange} MMR
                       </span>
@@ -907,7 +756,7 @@ export default function GamerDashboardPage() {
         {/* RIGHT 4 COLUMNS: CAREER QUESTS, RECOMMENDATIONS & ACHIEVEMENTS */}
         <div className="lg:col-span-4 space-y-8">
           {/* CAREER QUESTS & PROMOTION PROGRESS */}
-          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-4 shadow-2xl">
+          <div className="rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 space-y-4 shadow-2xl">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-amber-400" />
               <h3 className="font-sans text-[16px] font-semibold text-white">
@@ -920,36 +769,36 @@ export default function GamerDashboardPage() {
 
             <div className="space-y-4 pt-1">
               {/* Quest 1 */}
-              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[#232A42]">
+              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[rgba(168,85,247,0.25)]">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span className="text-white">Road to #1 National Rank</span>
                   <span className="text-amber-400 font-mono">75%</span>
                 </div>
-                <div className="h-1.5 w-full bg-[#0E111A] rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-[#14111F] rounded-full overflow-hidden">
                   <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-300 w-[75%]" />
                 </div>
                 <span className="text-[10px] text-slate-400 block">Rank #3 → Rank #1 Target</span>
               </div>
 
               {/* Quest 2 */}
-              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[#232A42]">
+              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[rgba(168,85,247,0.25)]">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span className="text-white">LAN Arena Dominator</span>
                   <span className="text-cyan-400 font-mono">80%</span>
                 </div>
-                <div className="h-1.5 w-full bg-[#0E111A] rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-[#14111F] rounded-full overflow-hidden">
                   <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-cyan-300 w-[80%]" />
                 </div>
                 <span className="text-[10px] text-slate-400 block">4 / 5 Stage matches won</span>
               </div>
 
               {/* Quest 3 */}
-              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[#232A42]">
+              <div className="space-y-1.5 p-3 rounded-xl bg-[#141826] border border-[rgba(168,85,247,0.25)]">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span className="text-white">Circuit Bounty Hunter</span>
                   <span className="text-emerald-400 font-mono">72%</span>
                 </div>
-                <div className="h-1.5 w-full bg-[#0E111A] rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-[#14111F] rounded-full overflow-hidden">
                   <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-300 w-[72%]" />
                 </div>
                 <span className="text-[10px] text-slate-400 block">145,000 / 200,000 ETB earned</span>
@@ -958,7 +807,7 @@ export default function GamerDashboardPage() {
           </div>
 
           {/* RECOMMENDED TOURNAMENTS */}
-          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-4 shadow-2xl">
+          <div className="rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 space-y-4 shadow-2xl">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-violet-400" />
               <h3 className="font-sans text-[16px] font-semibold text-white">
@@ -973,7 +822,7 @@ export default function GamerDashboardPage() {
               {recommendedTournaments.map((tourn) => (
                 <div
                   key={tourn.id}
-                  className="p-3.5 rounded-2xl border border-[#232A42] bg-[#141826] hover:border-violet-500/50 transition space-y-2 group"
+                  className="p-3.5 rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#141826] hover:border-violet-500/50 transition space-y-2 group"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase text-violet-300 bg-violet-950 px-2 py-0.5 rounded border border-violet-800/40 font-mono">
@@ -1001,7 +850,7 @@ export default function GamerDashboardPage() {
           </div>
 
           {/* ACHIEVEMENTS TROPHY CASE */}
-          <div className="rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-4 shadow-2xl">
+          <div className="rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-amber-400" />
@@ -1015,7 +864,7 @@ export default function GamerDashboardPage() {
               {currentUser.achievements.map((ach) => (
                 <div
                   key={ach.id}
-                  className="p-3 rounded-2xl border border-[#232A42] bg-[#141826] flex items-center gap-3 hover:border-amber-500/40 transition"
+                  className="p-3 rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#141826] flex items-center gap-3 hover:border-amber-500/40 transition"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-700/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
                     <Flame className="w-5 h-5" />
@@ -1038,7 +887,7 @@ export default function GamerDashboardPage() {
       {/* CONNECT GAME MODAL */}
       {connectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="max-w-md w-full rounded-3xl border border-[#232A42] bg-[#0E111A] p-6 space-y-5 shadow-2xl">
+          <div className="max-w-md w-full rounded-3xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold text-white flex items-center gap-2">
                 <Gamepad2 className="w-5 h-5 text-violet-400" />
@@ -1058,7 +907,7 @@ export default function GamerDashboardPage() {
                 <select
                   value={selectedGameId}
                   onChange={(e) => setSelectedGameId(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-white text-[15px]"
+                  className="w-full px-3 py-2.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#141826] text-white text-[15px]"
                 >
                   {SUPPORTED_GAMES.map((g) => (
                     <option key={g.id} value={g.id}>
@@ -1076,7 +925,7 @@ export default function GamerDashboardPage() {
                   value={inGameName}
                   onChange={(e) => setInGameName(e.target.value)}
                   placeholder="e.g. Bekila_ETH or ViperX#ET01"
-                  className="w-full px-3 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-white text-[15px]"
+                  className="w-full px-3 py-2.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#141826] text-white text-[15px]"
                 />
               </div>
 
@@ -1090,7 +939,7 @@ export default function GamerDashboardPage() {
                   value={platformId}
                   onChange={(e) => setPlatformId(e.target.value)}
                   placeholder="e.g. Steam ID, PSN Name, Riot ID"
-                  className="w-full px-3 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-white text-[15px]"
+                  className="w-full px-3 py-2.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#141826] text-white text-[15px]"
                 />
               </div>
 
@@ -1098,7 +947,7 @@ export default function GamerDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setConnectModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-slate-300 text-[14px] font-medium"
+                  className="px-4 py-2.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#141826] text-slate-300 text-[14px] font-medium"
                 >
                   Cancel
                 </button>

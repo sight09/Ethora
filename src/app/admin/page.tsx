@@ -59,18 +59,30 @@ export default function AdminConsolePage() {
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* 1. ADMIN HEADER */}
-      <div className="relative rounded-2xl border border-rose-900/40 bg-gradient-to-r from-rose-950/20 via-[#0E111A] to-[#0E111A] p-6 lg:p-8 overflow-hidden shadow-2xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* 1. ADMIN HEADER (EPIC STADIUM ARENA BANNER) */}
+      <div className="relative rounded-2xl border border-rose-900/40 bg-[#14111F] p-6 lg:p-8 overflow-hidden shadow-2xl">
+        {/* Background Stadium Arena Banner */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <img
+            src="/images/ethora-stadium-banner.jpg"
+            alt="Esports Arena"
+            className="w-full h-full object-cover object-center opacity-30 filter contrast-125 scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#14111F] via-[#14111F]/80 to-[#14111F]/60 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#14111F] via-transparent to-[#14111F]/50 z-10" />
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-rose-500/15 rounded-full blur-3xl pointer-events-none z-10" />
+        </div>
+
+        <div className="relative z-20 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-300 text-xs font-semibold">
               <ShieldAlert className="w-3.5 h-3.5" />
               ETHORA Root Administration & Integrity
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-white font-mono tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-[800] text-[#F4F1FF] font-sans tracking-tight">
               PLATFORM ADMINISTRATOR CONSOLE
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#B8B3CC] max-w-2xl leading-relaxed font-sans">
               System governance, national athlete verification, tournament sanctioning, anti-cheat enforcement, and
               audit logging.
             </p>

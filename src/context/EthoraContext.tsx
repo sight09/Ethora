@@ -37,6 +37,8 @@ interface NotificationItem {
 
 interface EthoraContextType {
   currentSession: UserSession;
+  isAuthenticated: boolean;
+  isInitialized: boolean;
   setRole: (role: RoleType) => void;
   login: (email: string, password?: string) => { success: boolean; session: UserSession };
   logout: () => void;
@@ -187,7 +189,8 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
 ];
 
 export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentSession, setCurrentSession] = useState<UserSession>(PRESET_SESSIONS.gamer);
+  const [currentSession, setCurrentSession] = useState<UserSession>(PRESET_SESSIONS.guest);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [tournaments, setTournaments] = useState<Tournament[]>(INITIAL_TOURNAMENTS);
   const [gamers, setGamers] = useState<GamerProfile[]>(INITIAL_GAMERS);
   const [teams, setTeams] = useState<Team[]>(INITIAL_TEAMS);
@@ -231,12 +234,22 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (savedGamers) {
         setGamers(JSON.parse(savedGamers));
       }
+      const savedSession = localStorage.getItem("ethora_user_session");
       const savedRole = localStorage.getItem("ethora_active_role") as RoleType;
-      if (savedRole && PRESET_SESSIONS[savedRole]) {
+      if (savedSession) {
+        const parsed = JSON.parse(savedSession);
+        if (parsed && parsed.role !== "guest") {
+          setCurrentSession(parsed);
+        }
+      } else if (savedRole && savedRole !== "guest" && PRESET_SESSIONS[savedRole]) {
         setCurrentSession(PRESET_SESSIONS[savedRole]);
+      } else {
+        setCurrentSession(PRESET_SESSIONS.guest);
       }
     } catch {
       // LocalStorage fallback
+    } finally {
+      setIsInitialized(true);
     }
   }, []);
 
@@ -244,14 +257,14 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setTournaments(updated);
     try {
       localStorage.setItem("ethora_tournaments", JSON.stringify(updated));
-    } catch {}
+    } catch { }
   };
 
   const saveGamersState = (updated: GamerProfile[]) => {
     setGamers(updated);
     try {
       localStorage.setItem("ethora_gamers", JSON.stringify(updated));
-    } catch {}
+    } catch { }
   };
 
   const setRole = (newRole: RoleType) => {
@@ -259,7 +272,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setCurrentSession(session);
     try {
       localStorage.setItem("ethora_active_role", newRole);
-    } catch {}
+    } catch { }
   };
 
   const login = (email: string, password?: string): { success: boolean; session: UserSession } => {
@@ -279,7 +292,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         try {
           localStorage.setItem("ethora_active_role", s.role);
           localStorage.setItem("ethora_user_session", JSON.stringify(s));
-        } catch {}
+        } catch { }
         return { success: true, session: s };
       }
     }
@@ -301,7 +314,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try {
         localStorage.setItem("ethora_active_role", "gamer");
         localStorage.setItem("ethora_user_session", JSON.stringify(newSession));
-      } catch {}
+      } catch { }
       return { success: true, session: newSession };
     }
 
@@ -318,16 +331,16 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       localStorage.setItem("ethora_active_role", "gamer");
       localStorage.setItem("ethora_user_session", JSON.stringify(fallback));
-    } catch {}
+    } catch { }
     return { success: true, session: fallback };
   };
 
   const logout = () => {
     setCurrentSession(PRESET_SESSIONS.guest);
     try {
-      localStorage.setItem("ethora_active_role", "guest");
+      localStorage.removeItem("ethora_active_role");
       localStorage.removeItem("ethora_user_session");
-    } catch {}
+    } catch { }
   };
 
   const signUpUser = (data: { name: string; tag: string; email: string; role: RoleType }): UserSession => {
@@ -343,7 +356,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       localStorage.setItem("ethora_active_role", newSession.role);
       localStorage.setItem("ethora_user_session", JSON.stringify(newSession));
-    } catch {}
+    } catch { }
     return newSession;
   };
 
@@ -577,10 +590,14 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return id;
   };
 
+  const isAuthenticated = currentSession.role !== "guest" && Boolean(currentSession.email || currentSession.gamerId);
+
   return (
     <EthoraContext.Provider
       value={{
         currentSession,
+        isAuthenticated,
+        isInitialized,
         setRole,
         login,
         logout,

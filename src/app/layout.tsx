@@ -1,20 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import { EthoraProvider } from "@/context/EthoraContext";
 import AppLayoutClient from "@/components/layout/AppLayoutClient";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
 
 export const metadata: Metadata = {
   title: "ETHORA — Ethiopia's Premier Gaming & Esports Network",
@@ -37,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#08090E",
+  themeColor: "#0A0A12",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -51,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#08090E] text-slate-100 selection:bg-violet-600 selection:text-white`}
+        className="antialiased min-h-screen bg-[#0A0A12] text-[#B8B3CC] selection:bg-[#A855F7] selection:text-white font-sans"
       >
         <EthoraProvider>
           <AppLayoutClient>{children}</AppLayoutClient>
