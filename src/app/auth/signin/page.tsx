@@ -103,12 +103,12 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="relative h-screen max-h-screen w-full bg-[#05030d] text-slate-100 flex flex-col justify-between overflow-hidden select-none">
+    <div className="auth-entry-page relative h-screen max-h-screen w-full bg-[#05030d] text-slate-100 flex flex-col justify-between overflow-hidden select-none">
 
       {/* ======================================================== */}
       {/* 1. CRISP HD FULL-SCREEN BACKGROUND (Locked to Viewport)   */}
       {/* ======================================================== */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none select-none">
+      <div className="auth-entry-bg fixed inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <img
           src="/images/login-arena-clean.jpg"
           alt="ETHORA Arena Background"
@@ -122,7 +122,7 @@ export default function SignInPage() {
       {/* ======================================================== */}
       {/* 2. TOP NAVBAR (Links deleted as requested)                */}
       {/* ======================================================== */}
-      <header className="relative z-20 w-full px-6 lg:px-12 py-3 sm:py-4 flex items-center justify-between">
+      <header className="auth-entry-header relative z-20 w-full px-6 lg:px-12 py-3 sm:py-4 flex items-center justify-between">
         {/* Left: ETHORA Brand with Hooded Assassin Icon */}
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="w-9 h-9 rounded-xl overflow-hidden border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.4)] group-hover:scale-105 transition-transform flex items-center justify-center bg-[#0d0722]">
@@ -167,7 +167,7 @@ export default function SignInPage() {
           {/* ==================================================== */}
           {/* LEFT AREA: Native artwork visible, 4 bottom features */}
           {/* ==================================================== */}
-          <div className="hidden lg:flex lg:col-span-6 flex-col justify-between self-stretch py-2 min-h-0">
+          <div className="auth-entry-left hidden lg:flex lg:col-span-6 flex-col justify-between self-stretch py-2 min-h-0">
             {/* Interactive moving ETHORA Mascot Emblem */}
             <InteractiveAuthMascot />
 
@@ -242,7 +242,7 @@ export default function SignInPage() {
           {/* ==================================================== */}
           {/* RIGHT AREA: THE GLOWING VIOLET LOGIN CARD (Image 2) */}
           {/* ==================================================== */}
-          <div className="lg:col-span-6 flex justify-center lg:justify-end w-full">
+          <div className="auth-entry-card lg:col-span-6 flex justify-center lg:justify-end w-full">
             <div className="w-full max-w-[460px] rounded-2xl border border-[rgba(168,85,247,0.35)] bg-[#14111F] px-6 py-6 sm:px-8 sm:py-7 shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-xl relative overflow-hidden font-sans">
 
               {/* Soft purple ambient back-glow inside card */}

@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
-  Bot,
   Sparkles,
   Send,
   X,
@@ -16,6 +15,72 @@ import {
 } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
 import { EthoraEmblem } from "@/components/brand/EthoraLogo";
+
+// Clean message formatter that eliminates raw asterisks and creates clean esports typography
+const formatChatMessage = (text: string) => {
+  const lines = text.split("\n");
+  return lines.map((line, lineIdx) => {
+    const isBullet = line.trim().startsWith("•") || line.trim().startsWith("-");
+    const isNumbered = /^\d+\.\s/.test(line.trim());
+
+    // Clean text by parsing any **bold** markers without showing raw asterisks
+    const cleanLine = line.replace(/^\s*[•\-]\s*/, "");
+    const parts = cleanLine.split(/(\*\*[^*]+\*\*)/g);
+
+    const formattedContent = parts.map((part, partIdx) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return (
+          <span key={partIdx} className="font-bold text-[#F4F1FF]">
+            {part.slice(2, -2)}
+          </span>
+        );
+      }
+      return part;
+    });
+
+    if (isBullet) {
+      return (
+        <div key={lineIdx} className="flex items-start gap-2 py-0.5 pl-0.5">
+          <span className="text-[#A855F7] font-black leading-none mt-1 text-sm">•</span>
+          <span className="flex-1 text-[#B8B3CC]">{formattedContent}</span>
+        </div>
+      );
+    }
+
+    if (isNumbered) {
+      const match = line.trim().match(/^(\d+\.)\s*(.*)$/);
+      if (match) {
+        const numParts = match[2].split(/(\*\*[^*]+\*\*)/g);
+        return (
+          <div key={lineIdx} className="flex items-start gap-2 py-0.5 pl-0.5">
+            <span className="text-[#A855F7] font-bold text-[11px] leading-none mt-0.5 font-exo">{match[1]}</span>
+            <span className="flex-1 text-[#B8B3CC]">
+              {numParts.map((p, idx) =>
+                p.startsWith("**") && p.endsWith("**") ? (
+                  <span key={idx} className="font-bold text-[#F4F1FF]">
+                    {p.slice(2, -2)}
+                  </span>
+                ) : (
+                  p
+                )
+              )}
+            </span>
+          </div>
+        );
+      }
+    }
+
+    if (line.trim() === "") {
+      return <div key={lineIdx} className="h-1.5" />;
+    }
+
+    return (
+      <p key={lineIdx} className="text-[#B8B3CC]">
+        {formattedContent}
+      </p>
+    );
+  });
+};
 
 interface ChatMessage {
   id: string;
@@ -105,9 +170,9 @@ export const FloatingAIChat: React.FC<FloatingAIChatProps> = ({
         lower.includes("compete")
       ) {
         replyText = `Found verified tournaments ready for entry:
-• **Ethiopian National Valorant Masters 2026** (Double Elim, 250,000 ETB Prize, Millennium Hall LAN Finals).
-• **Ethiopia EA SPORTS FC 24 National Championship** (128 slots, 180,000 ETB Prize Pool, Sarbet Vanguard Arena).
-• **Horn of Africa PUBG Mobile Battlegrounds** (32 squads, 120,000 ETB Prize Pool).
+• Ethiopian National Valorant Masters 2026 (Double Elim, 250,000 ETB Prize, Millennium Hall LAN Finals).
+• Ethiopia EA SPORTS FC 24 National Championship (128 slots, 180,000 ETB Prize Pool, Sarbet Vanguard Arena).
+• Horn of Africa PUBG Mobile Battlegrounds (32 squads, 120,000 ETB Prize Pool).
 
 You can register directly from the tournament details page with your verified in-game tag!`;
         links = [{ label: "Browse Tournaments", href: "/tournaments" }];
@@ -119,9 +184,9 @@ You can register directly from the tournament details page with your verified in
         lower.includes("ladder")
       ) {
         replyText = `ETHORA National Ranking points are calculated through:
-1. **Match Victories**: Win matches in official events (+25 to +40 rating points per victory).
-2. **Placement Multipliers**: Finishing in top 3 of regional or national finals grants large bonuses (+150 to +300 pts).
-3. **Geographic Progression**: Community -> Woreda/City -> Zone -> Regional -> National Apex.`;
+1. Match Victories: Win matches in official events (+25 to +40 rating points per victory).
+2. Placement Multipliers: Finishing in top 3 of regional or national finals grants large bonuses (+150 to +300 pts).
+3. Geographic Progression: Community -> Woreda/City -> Zone -> Regional -> National Apex.`;
         links = [{ label: "View Leaderboards", href: "/rankings" }];
         suggestions = ["How to climb from Bole to National?", "Show top 3 gamers"];
       } else if (
@@ -133,10 +198,10 @@ You can register directly from the tournament details page with your verified in
         lower.includes("piassa")
       ) {
         replyText = `Top certified gaming hubs in Addis Ababa:
-• **Bole Medhanialem Cyber Lounge** (Bole Sub-City): Ultra-low latency fiber routes, 240Hz monitors.
-• **Sarbet Vanguard Gaming Arena** (Nifas Silk-Lafto): Console home of EA FC 24 and Tekken 8 weekend LANs.
-• **Piassa Historic Gamers Club** (Arada Sub-City): Classic PC Counter-Strike and fighting game arena.
-• **Megenagna Cyber Apex** (Yeka Sub-City): Tactical FPS 5v5 team scrim facilities.`;
+• Bole Medhanialem Cyber Lounge (Bole Sub-City): Ultra-low latency fiber routes, 240Hz monitors.
+• Sarbet Vanguard Gaming Arena (Nifas Silk-Lafto): Console home of EA FC 24 and Tekken 8 weekend LANs.
+• Piassa Historic Gamers Club (Arada Sub-City): Classic PC Counter-Strike and fighting game arena.
+• Megenagna Cyber Apex (Yeka Sub-City): Tactical FPS 5v5 team scrim facilities.`;
         suggestions = ["Find tournaments in Addis Ababa", "Recommend teams in Bole"];
       } else if (
         lower.includes("bracket") ||
@@ -144,9 +209,9 @@ You can register directly from the tournament details page with your verified in
         lower.includes("format")
       ) {
         replyText = `Tournament formats on ETHORA:
-• **Double Elimination**: Two losses before elimination. Upper and Lower brackets ensure the best teams reach the finals.
-• **Single Elimination**: Sudden death knockouts. Perfect for 1-day sprint cups.
-• **Group Stage**: Round-robin pools where top 2 teams advance to the championship bracket.`;
+• Double Elimination: Two losses before elimination. Upper and Lower brackets ensure the best teams reach the finals.
+• Single Elimination: Sudden death knockouts. Perfect for 1-day sprint cups.
+• Group Stage: Round-robin pools where top 2 teams advance to the championship bracket.`;
         suggestions = ["Create a tournament", "What tournaments are live?"];
       } else {
         replyText = `I analyzed your inquiry against the ETHORA competitive network. You can explore open tournaments, view your ranking progression on the leaderboards, or check match brackets. What title or city would you like to know more about?`;
@@ -189,33 +254,37 @@ You can register directly from the tournament details page with your verified in
 
   return (
     <>
-      {/* SMALL ROBOT FLOATING BUTTON IN THE BOTTOM-RIGHT CORNER */}
+      {/* ETHORA LOGO FLOATING BUTTON IN THE BOTTOM-RIGHT CORNER */}
       {!isOpen && (
         <div className="fixed bottom-6 right-6 z-50 transition-all duration-300">
           <button
             onClick={toggleOpen}
-            className="group relative flex items-center gap-2.5 p-3 sm:px-4 sm:py-3 rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 text-white shadow-2xl shadow-violet-600/50 border border-violet-400/50 hover:scale-105 active:scale-95 transition-all"
+            className="group relative flex items-center gap-2.5 p-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-[#14111F] hover:bg-[#1A1629] text-white shadow-2xl shadow-purple-950/60 border border-[rgba(168,85,247,0.35)] hover:border-[#A855F7] hover:scale-105 active:scale-95 transition-all"
             aria-label="Open ETHORA AI Copilot"
             title="Chat with ETHORA AI Copilot"
           >
             {/* Ambient outer glow */}
-            <div className="absolute inset-0 rounded-2xl bg-violet-600/40 blur-xl -z-10 group-hover:blur-2xl transition-all" />
+            <div className="absolute inset-0 rounded-2xl bg-[#A855F7]/25 blur-xl -z-10 group-hover:blur-2xl transition-all" />
 
-            {/* Small Robot Icon with Live Status Dot */}
+            {/* ETHORA Logo Icon with Live Status Dot */}
             <div className="relative flex items-center justify-center">
-              <div className="w-9 h-9 rounded-xl bg-black/40 border border-white/20 flex items-center justify-center text-white">
-                <Bot className="w-5 h-5 text-cyan-300 group-hover:rotate-12 transition-transform" />
+              <div className="w-10 h-10 rounded-xl overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center shadow-md">
+                <img
+                  src="/images/ethora-logo.jpg"
+                  alt="ETHORA AI"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
               </div>
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-black animate-ping" />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-black" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#22C55E] border-2 border-[#14111F] animate-ping" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#22C55E] border-2 border-[#14111F]" />
             </div>
 
-            <div className="hidden sm:block text-left">
+            <div className="hidden sm:block text-left pr-1">
               <div className="flex items-center gap-1.5">
-                <span className="font-mono font-black text-xs text-white leading-none">ETHORA AI</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="font-exo font-bold text-xs text-[#F4F1FF] leading-none">ETHORA AI</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#A855F7] animate-pulse" />
               </div>
-              <span className="text-[10px] text-violet-200 font-medium block mt-0.5">
+              <span className="text-[10px] text-[#B8B3CC] font-normal block mt-0.5">
                 Esports Copilot
               </span>
             </div>
@@ -226,28 +295,32 @@ You can register directly from the tournament details page with your verified in
       {/* EXPANDED AI CHAT WINDOW IN THE BOTTOM-RIGHT CORNER */}
       {isOpen && (
         <div
-          className={`fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] rounded-3xl border border-violet-500/40 bg-[#0A0D15]/95 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+          className={`fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] rounded-3xl border border-[rgba(168,85,247,0.35)] bg-[#0A0A12]/98 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
             isMinimized ? "h-16" : "h-[540px] max-h-[85vh]"
           }`}
         >
           {/* 1. CHAT HEADER */}
-          <div className="p-4 bg-gradient-to-r from-violet-950/80 via-[#141826] to-[#0E111A] border-b border-[#232A42] flex items-center justify-between shrink-0">
+          <div className="p-3.5 bg-gradient-to-r from-[#14111F] via-[#1A1629] to-[#0A0A12] border-b border-[rgba(168,85,247,0.25)] flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-8 h-8 rounded-xl bg-violet-600/30 border border-violet-500/40 flex items-center justify-center text-cyan-300">
-                  <Bot className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-xl overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center shadow-md">
+                  <img
+                    src="/images/ethora-logo.jpg"
+                    alt="ETHORA AI"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#0A0D15]" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#22C55E] border-2 border-[#14111F]" />
               </div>
 
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-black text-sm text-white">ETHORA AI</span>
-                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-violet-600/30 text-violet-300 border border-violet-500/30">
+                  <span className="font-exo font-extrabold text-sm text-[#F4F1FF]">ETHORA AI</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-[#A855F7]/20 text-[#A855F7] border border-[#A855F7]/30">
                     Copilot
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-400 block">
+                <span className="text-[10px] text-[#7D7896] block">
                   Online • Ethiopian Esports Intelligence
                 </span>
               </div>
@@ -257,7 +330,7 @@ You can register directly from the tournament details page with your verified in
             <div className="flex items-center gap-1">
               <button
                 onClick={handleResetChat}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition"
+                className="p-1.5 rounded-lg text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#14111F] transition"
                 title="Restart conversation"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -265,7 +338,7 @@ You can register directly from the tournament details page with your verified in
 
               <button
                 onClick={() => setIsMinimized(!isMinimized)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition"
+                className="p-1.5 rounded-lg text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#14111F] transition"
                 title={isMinimized ? "Expand" : "Minimize"}
               >
                 {isMinimized ? <Maximize2 className="w-3.5 h-3.5" /> : <Minimize2 className="w-3.5 h-3.5" />}
@@ -273,7 +346,7 @@ You can register directly from the tournament details page with your verified in
 
               <button
                 onClick={toggleOpen}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition"
+                className="p-1.5 rounded-lg text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#14111F] transition"
                 title="Close chat"
               >
                 <X className="w-4 h-4" />
@@ -284,7 +357,7 @@ You can register directly from the tournament details page with your verified in
           {/* 2. CHAT STREAM (WHEN NOT MINIMIZED) */}
           {!isMinimized && (
             <>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#08090E]/60 text-xs">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#0A0A12]/80 text-xs">
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
@@ -294,12 +367,16 @@ You can register directly from the tournament details page with your verified in
                   >
                     {/* Avatar */}
                     {msg.sender === "user" ? (
-                      <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center text-white shrink-0 text-xs">
+                      <div className="w-7 h-7 rounded-lg bg-[#A855F7] flex items-center justify-center text-[#F4F1FF] shrink-0 text-xs">
                         <User className="w-3.5 h-3.5" />
                       </div>
                     ) : (
-                      <div className="w-7 h-7 rounded-lg bg-[#141826] border border-cyan-500/40 flex items-center justify-center shrink-0 text-cyan-300">
-                        <Bot className="w-4 h-4" />
+                      <div className="w-7 h-7 rounded-lg overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center shrink-0 shadow">
+                        <img
+                          src="/images/ethora-logo.jpg"
+                          alt="ETHORA AI"
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     )}
 
@@ -307,12 +384,12 @@ You can register directly from the tournament details page with your verified in
                     <div
                       className={`max-w-[85%] space-y-2.5 ${
                         msg.sender === "user"
-                          ? "bg-violet-600 text-white rounded-2xl rounded-tr-none px-3.5 py-2.5 shadow-md"
-                          : "bg-[#141826] border border-[#232A42] text-slate-200 rounded-2xl rounded-tl-none p-3.5 shadow-md"
+                          ? "bg-[#A855F7] text-[#F4F1FF] rounded-2xl rounded-tr-none px-3.5 py-2.5 shadow-md"
+                          : "bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#B8B3CC] rounded-2xl rounded-tl-none p-3.5 shadow-md"
                       }`}
                     >
-                      <div className="text-xs leading-relaxed whitespace-pre-line font-sans">
-                        {msg.text}
+                      <div className="text-xs leading-relaxed font-sans space-y-1">
+                        {formatChatMessage(msg.text)}
                       </div>
 
                       {/* Links */}

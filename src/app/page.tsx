@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Users, Trophy, Globe, ChevronDown, Rocket } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
+import HeroTypingTitle from "@/components/landing/HeroTypingTitle";
 import "./landing.css";
 
 interface Champion {
@@ -215,11 +217,22 @@ const features = [
 export default function EthoraLandingPage() {
   const { gamers } = useEthora();
 
+  const router = useRouter();
+  const [isExitingToAuth, setIsExitingToAuth] = useState(false);
+
   // Auto-sliding game selector index
   const [gameIndex, setGameIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const handleNavigateToAuth = (path: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsExitingToAuth(true);
+    setTimeout(() => {
+      router.push(path);
+    }, 110);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -272,7 +285,10 @@ export default function EthoraLandingPage() {
   });
 
   return (
-    <main className="ethora-home">
+    <main className={`ethora-home ${isExitingToAuth ? "page-transition-exit" : ""}`}>
+      {/* High-speed Esports Portal Loading Beam */}
+      {isExitingToAuth && <div className="portal-nav-bar" />}
+
       {/* 1. TOP HEADER (CURVED CYBER HUD, TRANSLUCENT & STICKY ON SCROLL) */}
       <header className={`site-header ${isScrolled ? "header-scrolled" : ""}`}>
         {/* Esports Smooth Curved HUD Neon Border */}
@@ -327,7 +343,11 @@ export default function EthoraLandingPage() {
             <ChevronDown className="w-3 h-3 text-gray-400" />
           </div>
 
-          <Link className="btn-get-started" href="/auth/signin">
+          <Link
+            className="btn-get-started cursor-pointer"
+            href="/auth/signin"
+            onClick={handleNavigateToAuth("/auth/signin")}
+          >
             <Rocket className="w-3.5 h-3.5" />
             <span>Get Started</span>
           </Link>
@@ -339,21 +359,10 @@ export default function EthoraLandingPage() {
         <div className="hero-art" />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <h1>
-            WHERE GAMERS<br />
-            <span>BECOME LEGENDS.</span>
-          </h1>
+          <HeroTypingTitle />
           <p className="hero-subtitle">
             Compete. Climb. Be the Best. Join ETHORA and show your skills in thrilling tournaments and rankings!
           </p>
-          <div className="hero-buttons">
-            <Link className="btn-primary" href="/rankings">
-              <span>🏆</span> Explore Rankings <span>→</span>
-            </Link>
-            <Link className="btn-secondary" href="/tournaments">
-              <span className="play-icon">▶</span> Watch Trailer
-            </Link>
-          </div>
           <div className="community-proof">
             <div className="avatar-stack">
               <img
@@ -382,6 +391,15 @@ export default function EthoraLandingPage() {
               <small>One community. One arena.</small>
             </div>
           </div>
+        </div>
+        {/* Action buttons centered at the horizontal center of the page */}
+        <div className="hero-buttons">
+          <Link className="btn-primary" href="/rankings">
+            <span>🏆</span> Explore Rankings <span>→</span>
+          </Link>
+          <Link className="btn-secondary" href="/tournaments">
+            <span className="play-icon">▶</span> Watch Trailer
+          </Link>
         </div>
         <div className="hero-vertical">
           ETHORA <i /> COMPETE WITHOUT LIMITS
@@ -530,7 +548,11 @@ export default function EthoraLandingPage() {
             READY TO <span>RISE?</span>
           </h2>
           <p>Create your gamer profile, find your competition, and start your journey to the top.</p>
-          <Link className="btn-primary" href="/auth/signup">
+          <Link
+            className="btn-primary cursor-pointer"
+            href="/auth/signup"
+            onClick={handleNavigateToAuth("/auth/signup")}
+          >
             Join ETHORA <span>↗</span>
           </Link>
         </div>

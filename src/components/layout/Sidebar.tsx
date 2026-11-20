@@ -21,7 +21,6 @@ import {
   LayoutDashboard,
   PlusCircle,
   ShieldCheck,
-  Bot,
   PanelLeftClose,
   PanelLeftOpen,
   ChevronRight,
@@ -78,13 +77,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
     highlight?: boolean;
   }
 
-  // Navigation items
-  const mainNav: NavItem[] = [
-    {
-      label: "Overview",
-      href: isOrganizer ? "/organizer" : isAdmin ? "/admin" : isGuest ? "/" : "/dashboard",
-      icon: LayoutDashboard,
-    },
+  // Navigation items: Primary home/dashboard for current persona
+  const homeNav: NavItem = {
+    label: isOrganizer ? "Organizer Hub" : isAdmin ? "Admin Console" : "Dashboard",
+    href: isOrganizer ? "/organizer" : isAdmin ? "/admin" : isGuest ? "/" : "/dashboard",
+    icon: LayoutDashboard,
+  };
+
+  // Competitions navigation (Tournaments & Rankings only — no duplicate Overview)
+  const competitionsNav: NavItem[] = [
     { label: "Tournaments", href: "/tournaments", icon: Swords, badge: "Live" },
     { label: "Rankings", href: "/rankings", icon: Trophy },
   ];
@@ -97,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const organizerNav: NavItem[] = [
     { label: "Organizer Hub", href: "/organizer", icon: LayoutDashboard },
-    { label: "Create Tournament", href: "/organizer/create", icon: PlusCircle, highlight: true },
+    { label: "Create Tournament", href: "/organizer/create", icon: PlusCircle },
   ];
 
   const adminNav: NavItem[] = [
@@ -111,12 +112,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   // ==========================================
-  // RENDER COLLAPSED VIEW (w-20, Logo triggers Expand)
+  // RENDER COLLAPSED VIEW (w-20, Professional Spacing & Standard Gap)
   // ==========================================
   const renderCollapsedContent = () => (
-    <div className="flex flex-col h-full bg-[#14111F] border-r border-[rgba(168,85,247,0.25)] text-[#B8B3CC] select-none items-center py-4 justify-between w-20">
+    <div className="flex flex-col h-full bg-[#14111F] border-r border-[rgba(168,85,247,0.25)] text-[#B8B3CC] select-none items-center py-3 w-20">
       {/* Top: LOGO ICON AS COLLAPSE/EXPAND TOGGLE BUTTON */}
-      <div className="flex flex-col items-center gap-4 w-full">
+      <div className="flex flex-col items-center w-full pb-3 border-b border-[rgba(168,85,247,0.18)]">
         <div className="relative group">
           <button
             onClick={onToggleCollapse}
@@ -137,9 +138,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Middle: Navigation Icons with Tooltips */}
-      <div className="flex flex-col items-center gap-3 w-full my-auto py-4">
-        {[...mainNav, ...communityNav].map((item) => {
+      {/* Middle: Navigation Icons starting right below header with professional 8px spacing */}
+      <div className="flex-1 w-full flex flex-col items-center pt-3 pb-2 gap-2">
+        {/* Primary Role Home / Dashboard */}
+        <div key={homeNav.href} className="relative group flex justify-center w-full">
+          <Link
+            href={homeNav.href}
+            className={`w-11 h-11 rounded-xl transition-all duration-200 relative flex items-center justify-center ${
+              pathname === homeNav.href
+                ? "bg-[#A855F7]/20 text-[#F4F1FF] border border-[#A855F7]/40 shadow-[0_0_14px_rgba(168,85,247,0.35)]"
+                : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/12"
+            }`}
+          >
+            {pathname === homeNav.href && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#A855F7] shadow-[0_0_8px_#A855F7]" />
+            )}
+            <LayoutDashboard className={`w-5 h-5 ${pathname === homeNav.href ? "text-[#A855F7]" : ""}`} strokeWidth={1.75} />
+          </Link>
+
+          {/* Hover Tooltip on Right */}
+          <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#F4F1FF] text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
+            {homeNav.label}
+          </div>
+        </div>
+
+        {/* Competitions */}
+        {competitionsNav.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
@@ -147,19 +171,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div key={item.href} className="relative group flex justify-center w-full">
               <Link
                 href={item.href}
-                className={`p-3 rounded-xl transition relative flex items-center justify-center ${isActive
-                  ? "bg-[#A855F7]/20 text-[#F4F1FF] border-l-[3px] border-[#A855F7] shadow-[0_0_12px_rgba(168,85,247,0.4)]"
-                  : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
-                  } ${item.highlight ? "bg-[#A855F7] text-white shadow-[0_0_15px_rgba(168,85,247,0.5)]" : ""}`}
+                className={`w-11 h-11 rounded-xl transition-all duration-200 relative flex items-center justify-center ${isActive
+                  ? "bg-[#A855F7]/20 text-[#F4F1FF] border border-[#A855F7]/40 shadow-[0_0_14px_rgba(168,85,247,0.35)]"
+                  : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/12"
+                  }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? "text-[#A855F7]" : ""}`} />
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#A855F7] shadow-[0_0_8px_#A855F7]" />
+                )}
+                <Icon className={`w-5 h-5 ${isActive ? "text-[#A855F7]" : ""}`} strokeWidth={1.75} />
                 {item.badge && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A855F7] animate-pulse" />
                 )}
               </Link>
 
               {/* Hover Tooltip on Right */}
-              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#0E111A] border border-[#232A42] text-white text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
+              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#F4F1FF] text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
+                {item.label}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Subtle section divider between competitions and community */}
+        <div className="w-8 h-[1px] bg-[rgba(168,85,247,0.2)] my-1" />
+
+        {/* Community Nav */}
+        {communityNav.map((item) => {
+          const isActive = pathname === item.href;
+          const Icon = item.icon;
+
+          return (
+            <div key={item.href} className="relative group flex justify-center w-full">
+              <Link
+                href={item.href}
+                className={`w-11 h-11 rounded-xl transition-all duration-200 relative flex items-center justify-center ${isActive
+                  ? "bg-[#A855F7]/20 text-[#F4F1FF] border border-[#A855F7]/40 shadow-[0_0_14px_rgba(168,85,247,0.35)]"
+                  : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/12"
+                  }`}
+              >
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#A855F7] shadow-[0_0_8px_#A855F7]" />
+                )}
+                <Icon className={`w-5 h-5 ${isActive ? "text-[#A855F7]" : ""}`} strokeWidth={1.75} />
+              </Link>
+
+              {/* Hover Tooltip on Right */}
+              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#F4F1FF] text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
                 {item.label}
               </div>
             </div>
@@ -168,7 +226,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Bottom: Alerts, Profile Avatar with Role Switcher, Fiber status */}
-      <div className="flex flex-col items-center gap-3 w-full pb-1">
+      <div className="mt-auto w-full pt-3 pb-1 border-t border-[rgba(168,85,247,0.18)] flex flex-col items-center gap-2.5">
         {/* Notifications Icon */}
         <div className="relative group">
           <button
@@ -336,7 +394,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span className="px-3 text-[12px] font-[600] text-[#7D7896] uppercase tracking-[0.2em] block mb-1.5">
             Competitions
           </span>
-          {mainNav.map((item) => {
+          {competitionsNav.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
             return (
@@ -404,11 +462,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-[15px] transition ${item.highlight
-                    ? "bg-[#A855F7] hover:bg-[#9333EA] text-[#F4F1FF] shadow-[0_0_15px_rgba(168,85,247,0.5)] font-[600] uppercase"
-                    : isActive
-                      ? "font-[600] text-[#F4F1FF] bg-[#A855F7]/15 border-l-[3px] border-[#A855F7]"
-                      : "font-[500] text-[#B8B3CC] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-[15px] transition ${isActive
+                    ? "font-[600] text-[#F4F1FF] bg-[#A855F7]/15 border-l-[3px] border-[#A855F7] shadow-[0_0_12px_rgba(168,85,247,0.35)]"
+                    : "font-[500] text-[#B8B3CC] hover:text-[#F4F1FF] hover:bg-[#A855F7]/10"
                     }`}
                 >
                   <div className="flex items-center gap-2.5">
@@ -630,12 +686,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Quick Robot Icon in Mobile Header */}
+          {/* Quick AI Icon in Mobile Header */}
           <button
             onClick={onOpenAIChat}
-            className="p-2 rounded-xl bg-violet-600/20 text-violet-300 border border-violet-500/40 flex items-center gap-1.5 text-xs font-bold"
+            className="px-2.5 py-1.5 rounded-xl bg-[#14111F] text-[#F4F1FF] border border-[rgba(168,85,247,0.35)] hover:border-[#A855F7] flex items-center gap-1.5 text-xs font-bold"
           >
-            <Bot className="w-4 h-4 text-cyan-400" />
+            <div className="w-4 h-4 rounded-md overflow-hidden flex items-center justify-center">
+              <img src="/images/ethora-logo.jpg" alt="ETHORA AI" className="w-full h-full object-cover" />
+            </div>
             <span>AI</span>
           </button>
 

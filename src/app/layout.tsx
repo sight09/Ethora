@@ -18,8 +18,13 @@ export const metadata: Metadata = {
     "Esports Tournament Platform",
   ],
   icons: {
-    icon: "/images/ethora-logo.jpg",
-    apple: "/images/ethora-logo.jpg",
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/images/ethora-logo.jpg", type: "image/jpeg" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/icon.png",
+    apple: "/apple-icon.png",
   },
 };
 

@@ -1,22 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import {
   ShieldCheck,
   MapPin,
   Calendar,
   Crown,
-  TrendingUp,
-  Coins,
   Check,
   Copy,
-  Sparkles,
 } from "lucide-react";
-import { Gamer } from "@/types";
+import { GamerProfile } from "@/data/mockData";
 
 interface GamerDashboardHeaderProps {
-  currentUser: Gamer;
+  currentUser: GamerProfile;
 }
 
 export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
@@ -172,7 +168,7 @@ export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
                   ETB
                 </div>
                 <span className="text-[22px] sm:text-[26px] font-[700] text-[#F5B82E] tabular-nums leading-none">
-                  ETB 385,000
+                  ETB {currentUser.stats?.earningsETB ? currentUser.stats.earningsETB.toLocaleString() : "385,000"}
                 </span>
               </div>
             </div>
@@ -190,11 +186,11 @@ export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
                 National Rank
               </span>
               <span className="text-[40px] font-[800] text-[#F5B82E] tabular-nums leading-none my-1 drop-shadow-[0_2px_10px_rgba(245,184,46,0.5)]">
-                #1
+                #{currentUser.nationalRank || 1}
               </span>
               <div className="flex items-center gap-1.5 text-[12px] font-[500] text-[#F4F1FF] mt-0.5">
                 <span className="text-sm">🇪🇹</span>
-                <span>Addis Ababa</span>
+                <span>{currentUser.location?.regionName || currentUser.location?.communityName || "Addis Ababa"}</span>
               </div>
             </div>
           </div>

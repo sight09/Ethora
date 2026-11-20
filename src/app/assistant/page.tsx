@@ -6,7 +6,6 @@ import {
   Sparkles,
   Send,
   User,
-  Bot,
   Swords,
   Trophy,
   MapPin,
@@ -18,6 +17,71 @@ import {
 } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
 import { EthoraEmblem } from "@/components/brand/EthoraLogo";
+
+// Clean message formatter that eliminates raw asterisks and creates clean esports typography
+const formatChatMessage = (text: string) => {
+  const lines = text.split("\n");
+  return lines.map((line, lineIdx) => {
+    const isBullet = line.trim().startsWith("•") || line.trim().startsWith("-");
+    const isNumbered = /^\d+\.\s/.test(line.trim());
+
+    const cleanLine = line.replace(/^\s*[•\-]\s*/, "");
+    const parts = cleanLine.split(/(\*\*[^*]+\*\*)/g);
+
+    const formattedContent = parts.map((part, partIdx) => {
+      if (part.startsWith("")) {
+        return (
+          <span key={partIdx} className="font-bold text-[#F4F1FF]">
+            {part.slice(2, -2)}
+          </span>
+        );
+      }
+      return part;
+    });
+
+    if (isBullet) {
+      return (
+        <div key={lineIdx} className="flex items-start gap-2 py-0.5 pl-0.5">
+          <span className="text-[#A855F7] font-black leading-none mt-1 text-sm">•</span>
+          <span className="flex-1 text-[#B8B3CC]">{formattedContent}</span>
+        </div>
+      );
+    }
+
+    if (isNumbered) {
+      const match = line.trim().match(/^(\d+\.)\s*(.*)$/);
+      if (match) {
+        const numParts = match[2].split(/(\*\*[^*]+\*\*)/g);
+        return (
+          <div key={lineIdx} className="flex items-start gap-2 py-0.5 pl-0.5">
+            <span className="text-[#A855F7] font-bold text-xs leading-none mt-0.5">{match[1]}</span>
+            <span className="flex-1 text-[#B8B3CC]">
+              {numParts.map((p, idx) =>
+                p.startsWith("") ? (
+                  <span key={idx} className="font-bold text-[#F4F1FF]">
+                    {p.slice(2, -2)}
+                  </span>
+                ) : (
+                  p
+                )
+              )}
+            </span>
+          </div>
+        );
+      }
+    }
+
+    if (line.trim() === "") {
+      return <div key={lineIdx} className="h-1.5" />;
+    }
+
+    return (
+      <p key={lineIdx} className="text-[#B8B3CC]">
+        {formattedContent}
+      </p>
+    );
+  });
+};
 
 interface ChatMessage {
   id: string;
@@ -89,33 +153,33 @@ export default function EthoraAIAssistantPage() {
 
       if (lower.includes("tournament") || lower.includes("register") || lower.includes("competition")) {
         replyText = `Based on current verified listings, there are active tournaments open for registration:
-1. **Ethiopian National Valorant Masters 2026** (Double Elimination • 250,000 ETB Prize Pool • Millennium Hall Finals).
-2. **Ethiopia EA SPORTS FC 24 National Championship** (128 slots • 180,000 ETB Prize Pool • Sarbet Vanguard Arena).
-3. **Horn of Africa PUBG Mobile Battlegrounds** (32 squads • 120,000 ETB Prize Pool).
+1. Ethiopian National Valorant Masters 2026 (Double Elimination • 250,000 ETB Prize Pool • Millennium Hall Finals).
+2. Ethiopia EA SPORTS FC 24 National Championship (128 slots • 180,000 ETB Prize Pool • Sarbet Vanguard Arena).
+3. Horn of Africa PUBG Mobile Battlegrounds (32 squads • 120,000 ETB Prize Pool).
 
 Your ETHORA Passport verifies your eligibility to submit roster applications directly from the tournament portal.`;
         links = [{ label: "Explore Tournaments", href: "/tournaments" }];
         suggestions = ["How do brackets work?", "What are the rules for Valorant Masters?"];
       } else if (lower.includes("ranking") || lower.includes("calculate") || lower.includes("points") || lower.includes("mmr")) {
         replyText = `ETHORA's ranking calculation is game-specific and transparent:
-- **Sanctioned Match Victories**: Win matches in official events to earn +25 to +40 Rating Points based on opponent difficulty.
-- **Tournament Placement Multiplier**: Finishing in the top 3 of regional or national finals awards large prestige boosts (e.g., +150 to +300 pts).
-- **Geographic Escalation**: Consistent wins at the Community level qualify you for Woreda/City cups, then Zone, Regional, and the prestigious National Apex ranking.
-- **Inactivity Decay**: High-ranking athletes must play at least 1 verified match every 30 days to avoid minor point decay.`;
+- Sanctioned Match Victories: Win matches in official events to earn +25 to +40 Rating Points based on opponent difficulty.
+- Tournament Placement Multiplier: Finishing in the top 3 of regional or national finals awards large prestige boosts (e.g., +150 to +300 pts).
+- Geographic Escalation: Consistent wins at the Community level qualify you for Woreda/City cups, then Zone, Regional, and the prestigious National Apex ranking.
+- Inactivity Decay: High-ranking athletes must play at least 1 verified match every 30 days to avoid minor point decay.`;
         links = [{ label: "View Rankings", href: "/rankings" }];
         suggestions = ["Who is currently Rank #1 in Ethiopia?", "How do I level up my rank?"];
       } else if (lower.includes("hub") || lower.includes("addis") || lower.includes("lounge") || lower.includes("bole") || lower.includes("piassa")) {
         replyText = `Top sanctioned esports centers and gaming lounges in Addis Ababa include:
-- **Bole Medhanialem Cyber Lounge** (Bole Sub-City): Elite high-refresh monitors and ultra-low ping fiber routes to Middle East & EU servers.
-- **Sarbet Vanguard Gaming Arena** (Nifas Silk-Lafto): Console powerhouse hosting weekend EA FC 24 and Tekken 8 LANs.
-- **Piassa Historic Gamers Club** (Arada Sub-City): The iconic birthplace of Ethiopian Counter-Strike and fighting games.
-- **Megenagna Cyber Apex** (Yeka Sub-City): Tactical FPS training grounds for rising 5v5 rosters.`;
+- Bole Medhanialem Cyber Lounge (Bole Sub-City): Elite high-refresh monitors and ultra-low ping fiber routes to Middle East & EU servers.
+-  (Nifas Silk-Lafto): Console powerhouse hosting weekend EA FC 24 and Tekken 8 LANs.
+-  (Arada Sub-City): The iconic birthplace of Ethiopian Counter-Strike and fighting games.
+-  (Yeka Sub-City): Tactical FPS training grounds for rising 5v5 rosters.`;
         suggestions = ["Find teammates in Bole", "Show upcoming LAN tournaments"];
       } else if (lower.includes("bracket") || lower.includes("elimination") || lower.includes("format")) {
         replyText = `Here is how competition formats work on ETHORA:
-- **Double Elimination (Gold Standard)**: Every roster gets two lives. Losing in the Upper Bracket drops you to the Lower Bracket, where you can battle back to the Grand Finals. Recommended for championships with cash prizes.
-- **Single Elimination (Sprint)**: Sudden-death knockouts. One defeat eliminates a team. Fast and thrilling for 1-day or weekend qualifiers.
-- **Group Stage + Playoffs**: Rosters compete in round-robin pools (e.g., 4 groups of 4); top 2 from each group advance to elimination playoffs.`;
+- : Every roster gets two lives. Losing in the Upper Bracket drops you to the Lower Bracket, where you can battle back to the Grand Finals. Recommended for championships with cash prizes.
+- : Sudden-death knockouts. One defeat eliminates a team. Fast and thrilling for 1-day or weekend qualifiers.
+- : Rosters compete in round-robin pools (e.g., 4 groups of 4); top 2 from each group advance to elimination playoffs.`;
         suggestions = ["Create a Double Elimination tournament", "How do I report match scores?"];
       } else {
         replyText = `I analyzed your inquiry against ETHORA's competitive network database. You can manage your verified game handles in your dashboard, explore active regional circuits, or check with tournament directors. Let me know if you would like me to recommend specific tournaments or break down your ranking progression!`;
@@ -204,7 +268,7 @@ Your ETHORA Passport verifies your eligibility to submit roster applications dir
               </div>
 
               <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-line font-sans">
-                {msg.text}
+                {formatChatMessage(msg.text)}
               </div>
 
               {/* Action Links */}
