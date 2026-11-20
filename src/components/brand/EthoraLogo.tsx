@@ -40,11 +40,11 @@ export const EthoraEmblem: React.FC<{
       {/* Outer ambient glow */}
       <div className="absolute inset-0 bg-violet-600/40 rounded-xl blur-md -z-10 group-hover:blur-xl transition-all" />
 
-      {/* The User-Provided ETHORA Esports Hooded Assassin Mascot Logo */}
+      {/* The User-Provided ETHORA Esports Hooded Assassin Mascot Logo (Transparent Background) */}
       <img
-        src="/images/ethora-logo.jpg"
+        src="/ethora-logo.png"
         alt="ETHORA Logo"
-        className="w-full h-full object-cover rounded-xl border border-violet-500/50 shadow-glow-violet transition-transform"
+        className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(168,85,247,0.5)] transition-transform"
       />
     </div>
   );

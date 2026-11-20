@@ -125,11 +125,11 @@ export default function SignUpPage() {
       <header className="auth-entry-header relative z-20 w-full px-6 lg:px-12 py-3 sm:py-4 flex items-center justify-between">
         {/* Left: ETHORA Brand with Hooded Assassin Icon */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl overflow-hidden border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.4)] group-hover:scale-105 transition-transform flex items-center justify-center bg-[#0d0722]">
+          <div className="w-9 h-9 rounded-xl overflow-hidden border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.4)] group-hover:scale-105 transition-transform flex items-center justify-center bg-[#0d0722] p-0.5">
             <img
-              src="/images/ethora-logo.jpg"
+              src="/ethora-logo.png"
               alt="ETHORA Logo"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain filter drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]"
             />
           </div>
           <span className="font-sans font-black text-xl sm:text-2xl tracking-wider text-white">

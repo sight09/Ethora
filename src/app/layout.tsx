@@ -20,7 +20,6 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/icon.png", type: "image/png" },
-      { url: "/images/ethora-logo.jpg", type: "image/jpeg" },
       { url: "/favicon.ico" },
     ],
     shortcut: "/icon.png",

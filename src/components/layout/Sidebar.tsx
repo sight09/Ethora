@@ -692,7 +692,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="px-2.5 py-1.5 rounded-xl bg-[#14111F] text-[#F4F1FF] border border-[rgba(168,85,247,0.35)] hover:border-[#A855F7] flex items-center gap-1.5 text-xs font-bold"
           >
             <div className="w-4 h-4 rounded-md overflow-hidden flex items-center justify-center">
-              <img src="/images/ethora-logo.jpg" alt="ETHORA AI" className="w-full h-full object-cover" />
+              <img src="/ethora-logo.png" alt="ETHORA AI" className="w-full h-full object-contain filter drop-shadow-[0_0_4px_rgba(168,85,247,0.6)]" />
             </div>
             <span>AI</span>
           </button>

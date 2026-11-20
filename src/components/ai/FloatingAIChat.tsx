@@ -268,11 +268,11 @@ You can register directly from the tournament details page with your verified in
 
             {/* ETHORA Logo Icon with Live Status Dot */}
             <div className="relative flex items-center justify-center">
-              <div className="w-10 h-10 rounded-xl overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center shadow-md">
+              <div className="w-10 h-10 rounded-xl overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center p-0.5 shadow-md">
                 <img
-                  src="/images/ethora-logo.jpg"
+                  src="/ethora-logo.png"
                   alt="ETHORA AI"
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]"
                 />
               </div>
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#22C55E] border-2 border-[#14111F] animate-ping" />
@@ -303,11 +303,11 @@ You can register directly from the tournament details page with your verified in
           <div className="p-3.5 bg-gradient-to-r from-[#14111F] via-[#1A1629] to-[#0A0A12] border-b border-[rgba(168,85,247,0.25)] flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-8 h-8 rounded-xl overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center shadow-md">
+                <div className="w-8 h-8 rounded-xl overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center p-0.5 shadow-md">
                   <img
-                    src="/images/ethora-logo.jpg"
+                    src="/ethora-logo.png"
                     alt="ETHORA AI"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain filter drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]"
                   />
                 </div>
                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#22C55E] border-2 border-[#14111F]" />
@@ -371,11 +371,11 @@ You can register directly from the tournament details page with your verified in
                         <User className="w-3.5 h-3.5" />
                       </div>
                     ) : (
-                      <div className="w-7 h-7 rounded-lg overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center shrink-0 shadow">
+                      <div className="w-7 h-7 rounded-lg overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center p-0.5 shrink-0 shadow">
                         <img
-                          src="/images/ethora-logo.jpg"
+                          src="/ethora-logo.png"
                           alt="ETHORA AI"
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain filter drop-shadow-[0_0_4px_rgba(168,85,247,0.6)]"
                         />
                       </div>
                     )}
