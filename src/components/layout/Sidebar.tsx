@@ -27,6 +27,7 @@ import {
   ChevronLeft,
   LogIn,
   LogOut,
+  User,
 } from "lucide-react";
 import EthoraLogo, { EthoraEmblem } from "@/components/brand/EthoraLogo";
 import { useEthora, RoleType } from "@/context/EthoraContext";
@@ -58,7 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  const isOrganizer = currentSession.role === "organizer";
+  const isOrganizer = currentSession.role === "organizer" || currentSession.role === "organization" || currentSession.tag === "RiftAdmin";
   const isAdmin = currentSession.role === "admin";
   const isGuest = currentSession.role === "guest";
 
@@ -77,13 +78,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     highlight?: boolean;
   }
 
-  // Navigation items: Primary home/dashboard for current persona
-  const homeNav: NavItem = {
-    label: isOrganizer ? "Organizer Hub" : isAdmin ? "Admin Console" : "Dashboard",
-    href: isOrganizer ? "/organizer" : isAdmin ? "/admin" : isGuest ? "/" : "/dashboard",
-    icon: LayoutDashboard,
-  };
-
   // Competitions navigation (Tournaments & Rankings only — no duplicate Overview)
   const competitionsNav: NavItem[] = [
     { label: "Tournaments", href: "/tournaments", icon: Swords, badge: "Live" },
@@ -92,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const gamerNav: NavItem[] = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "My Profile", href: "/profile", icon: Users },
+    { label: "My Profile", href: "/profile", icon: User },
     { label: "Passport Settings", href: "/profile/settings", icon: Settings },
   ];
 
@@ -111,8 +105,56 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { label: "Organizations", href: "/organizations", icon: ShieldCheck },
   ];
 
+  // Precise active link matcher shared across collapsed and expanded views
+  const isItemActive = (href: string) => {
+    if (pathname === href) return true;
+    if (href === "/tournaments" && pathname.startsWith("/tournaments/")) return true;
+    if (href === "/organizer" && pathname.startsWith("/organizer/") && pathname !== "/organizer/create") return true;
+    return false;
+  };
+
+  // Reusable collapsed item renderer with active glow, indicator bar, badge, and tooltip
+  const renderCollapsedItem = (item: NavItem) => {
+    const isActive = isItemActive(item.href);
+    const Icon = item.icon;
+
+    return (
+      <div key={item.href} className="relative group flex justify-center w-full">
+        <Link
+          href={item.href}
+          className={`w-11 h-11 rounded-xl transition-all duration-200 relative flex items-center justify-center ${
+            isActive
+              ? "bg-[#A855F7]/20 text-[#F4F1FF] border border-[#A855F7]/40 shadow-[0_0_14px_rgba(168,85,247,0.35)]"
+              : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/12"
+          }`}
+        >
+          {isActive && (
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#A855F7] shadow-[0_0_8px_#A855F7]" />
+          )}
+          <Icon
+            className={`w-5 h-5 ${isActive ? "text-[#A855F7]" : ""}`}
+            strokeWidth={1.75}
+          />
+          {item.badge && (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A855F7] animate-pulse" />
+          )}
+        </Link>
+
+        {/* Hover Tooltip on Right */}
+        <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#F4F1FF] text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50 flex items-center gap-1.5">
+          <span>{item.label}</span>
+          {item.badge && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-[#A855F7]/30 text-[#F4F1FF] border border-[#A855F7]/40">
+              {item.badge}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // ==========================================
-  // RENDER COLLAPSED VIEW (w-20, Professional Spacing & Standard Gap)
+  // RENDER COLLAPSED VIEW (w-20, All profile role buttons displayed 1:1)
   // ==========================================
   const renderCollapsedContent = () => (
     <div className="flex flex-col h-full bg-[#14111F] border-r border-[rgba(168,85,247,0.25)] text-[#B8B3CC] select-none items-center py-3 w-20">
@@ -138,91 +180,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Middle: Navigation Icons starting right below header with professional 8px spacing */}
-      <div className="flex-1 w-full flex flex-col items-center pt-3 pb-2 gap-2">
-        {/* Primary Role Home / Dashboard */}
-        <div key={homeNav.href} className="relative group flex justify-center w-full">
-          <Link
-            href={homeNav.href}
-            className={`w-11 h-11 rounded-xl transition-all duration-200 relative flex items-center justify-center ${
-              pathname === homeNav.href
-                ? "bg-[#A855F7]/20 text-[#F4F1FF] border border-[#A855F7]/40 shadow-[0_0_14px_rgba(168,85,247,0.35)]"
-                : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/12"
-            }`}
-          >
-            {pathname === homeNav.href && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#A855F7] shadow-[0_0_8px_#A855F7]" />
-            )}
-            <LayoutDashboard className={`w-5 h-5 ${pathname === homeNav.href ? "text-[#A855F7]" : ""}`} strokeWidth={1.75} />
-          </Link>
+      {/* Middle: Navigation Icons displaying ALL available buttons for active profile role */}
+      <div className="flex-1 w-full flex flex-col items-center pt-3 pb-2 gap-1.5">
+        {/* 1. Competitions: Tournaments & Rankings */}
+        {competitionsNav.map(renderCollapsedItem)}
 
-          {/* Hover Tooltip on Right */}
-          <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#F4F1FF] text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-            {homeNav.label}
-          </div>
-        </div>
+        {/* Subtle section divider before role-specific suite */}
+        {(currentSession.role === "gamer" || isOrganizer || isAdmin) && (
+          <div className="w-8 h-[1px] bg-[rgba(168,85,247,0.2)] my-1 shrink-0" />
+        )}
 
-        {/* Competitions */}
-        {competitionsNav.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
+        {/* 2. Role-Specific Suite: ALL buttons matching expanded sidebar */}
+        {/* Gamer Suite: Dashboard, My Profile, Passport Settings */}
+        {currentSession.role === "gamer" && gamerNav.map(renderCollapsedItem)}
 
-          return (
-            <div key={item.href} className="relative group flex justify-center w-full">
-              <Link
-                href={item.href}
-                className={`w-11 h-11 rounded-xl transition-all duration-200 relative flex items-center justify-center ${isActive
-                  ? "bg-[#A855F7]/20 text-[#F4F1FF] border border-[#A855F7]/40 shadow-[0_0_14px_rgba(168,85,247,0.35)]"
-                  : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/12"
-                  }`}
-              >
-                {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#A855F7] shadow-[0_0_8px_#A855F7]" />
-                )}
-                <Icon className={`w-5 h-5 ${isActive ? "text-[#A855F7]" : ""}`} strokeWidth={1.75} />
-                {item.badge && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#A855F7] animate-pulse" />
-                )}
-              </Link>
+        {/* Organizer Suite: Organizer Hub, Create Tournament */}
+        {isOrganizer && organizerNav.map(renderCollapsedItem)}
 
-              {/* Hover Tooltip on Right */}
-              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#F4F1FF] text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-                {item.label}
-              </div>
-            </div>
-          );
-        })}
+        {/* Admin Suite: Admin Console */}
+        {isAdmin && adminNav.map(renderCollapsedItem)}
 
-        {/* Subtle section divider between competitions and community */}
-        <div className="w-8 h-[1px] bg-[rgba(168,85,247,0.2)] my-1" />
+        {/* Subtle section divider between role suite and community */}
+        <div className="w-8 h-[1px] bg-[rgba(168,85,247,0.2)] my-1 shrink-0" />
 
-        {/* Community Nav */}
-        {communityNav.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
-
-          return (
-            <div key={item.href} className="relative group flex justify-center w-full">
-              <Link
-                href={item.href}
-                className={`w-11 h-11 rounded-xl transition-all duration-200 relative flex items-center justify-center ${isActive
-                  ? "bg-[#A855F7]/20 text-[#F4F1FF] border border-[#A855F7]/40 shadow-[0_0_14px_rgba(168,85,247,0.35)]"
-                  : "text-[#7D7896] hover:text-[#F4F1FF] hover:bg-[#A855F7]/12"
-                  }`}
-              >
-                {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-[#A855F7] shadow-[0_0_8px_#A855F7]" />
-                )}
-                <Icon className={`w-5 h-5 ${isActive ? "text-[#A855F7]" : ""}`} strokeWidth={1.75} />
-              </Link>
-
-              {/* Hover Tooltip on Right */}
-              <div className="absolute left-full ml-3 px-3 py-1.5 rounded-lg bg-[#14111F] border border-[rgba(168,85,247,0.25)] text-[#F4F1FF] text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-                {item.label}
-              </div>
-            </div>
-          );
-        })}
+        {/* 3. Community Nav: Gamers, Teams, Organizations */}
+        {communityNav.map(renderCollapsedItem)}
       </div>
 
       {/* Bottom: Alerts, Profile Avatar with Role Switcher, Fiber status */}
@@ -395,7 +377,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             Competitions
           </span>
           {competitionsNav.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = isItemActive(item.href);
             const Icon = item.icon;
             return (
               <Link
@@ -427,7 +409,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               My Arena
             </span>
             {gamerNav.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = isItemActive(item.href);
               const Icon = item.icon;
               return (
                 <Link
@@ -455,7 +437,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               Organizer Suite
             </span>
             {organizerNav.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = isItemActive(item.href);
               const Icon = item.icon;
               return (
                 <Link
@@ -483,7 +465,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               Administration
             </span>
             {adminNav.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = isItemActive(item.href);
               const Icon = item.icon;
               return (
                 <Link
@@ -510,7 +492,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             Community
           </span>
           {communityNav.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = isItemActive(item.href);
             const Icon = item.icon;
             return (
               <Link
@@ -692,7 +674,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="px-2.5 py-1.5 rounded-xl bg-[#14111F] text-[#F4F1FF] border border-[rgba(168,85,247,0.35)] hover:border-[#A855F7] flex items-center gap-1.5 text-xs font-bold"
           >
             <div className="w-4 h-4 rounded-md overflow-hidden flex items-center justify-center">
-              <img src="/ethora-logo.png" alt="ETHORA AI" className="w-full h-full object-contain filter drop-shadow-[0_0_4px_rgba(168,85,247,0.6)]" />
+              <img src="/ai-copilot-bot.svg" alt="ETHORA AI" className="w-full h-full object-contain filter drop-shadow-[0_0_4px_rgba(168,85,247,0.6)]" />
             </div>
             <span>AI</span>
           </button>

@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ShieldCheck,
   RotateCcw,
+  MessageSquare,
 } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
 import { EthoraEmblem } from "@/components/brand/EthoraLogo";
@@ -254,49 +255,53 @@ You can register directly from the tournament details page with your verified in
 
   return (
     <>
-      {/* ETHORA LOGO FLOATING BUTTON IN THE BOTTOM-RIGHT CORNER */}
+      {/* ========================================================= */}
+      {/* FUTURISTIC CIRCULAR AI CHAT LAUNCHER ORB IN BOTTOM-RIGHT   */}
+      {/* ========================================================= */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 transition-all duration-300">
-          <button
-            onClick={toggleOpen}
-            className="group relative flex items-center gap-2.5 p-2 sm:px-3.5 sm:py-2.5 rounded-2xl bg-[#14111F] hover:bg-[#1A1629] text-white shadow-2xl shadow-purple-950/60 border border-[rgba(168,85,247,0.35)] hover:border-[#A855F7] hover:scale-105 active:scale-95 transition-all"
-            aria-label="Open ETHORA AI Copilot"
-            title="Chat with ETHORA AI Copilot"
-          >
-            {/* Ambient outer glow */}
-            <div className="absolute inset-0 rounded-2xl bg-[#A855F7]/25 blur-xl -z-10 group-hover:blur-2xl transition-all" />
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] select-none">
+          {/* Single Circular Glowing AI Orb Button */}
+          <div className="relative group">
+            {/* Ambient Outer Radar Sonar Waves */}
+            <div className="absolute inset-0 rounded-full bg-purple-600/30 blur-xl animate-pulse pointer-events-none" />
+            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-500 to-indigo-600 opacity-60 blur-md group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-            {/* ETHORA Logo Icon with Live Status Dot */}
-            <div className="relative flex items-center justify-center">
-              <div className="w-10 h-10 rounded-xl overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center p-0.5 shadow-md">
+            <button
+              onClick={toggleOpen}
+              className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full p-[2.5px] bg-gradient-to-tr from-[#9333EA] via-[#C084FC] to-[#EC4899] hover:from-[#A855F7] hover:via-[#E879F9] hover:to-[#818CF8] shadow-[0_10px_35px_rgba(168,85,247,0.55),0_0_20px_rgba(168,85,247,0.4)] group-hover:scale-110 active:scale-95 transition-all duration-300 flex items-center justify-center focus:outline-none cursor-pointer"
+              aria-label="Open ETHORA AI Copilot Chat"
+              title="Chat with ETHORA AI Copilot"
+            >
+              {/* Inner Core Circle */}
+              <div className="w-full h-full rounded-full bg-[#0C0A17] flex items-center justify-center relative overflow-hidden">
+                {/* Subtle cyber grid/gradient background */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(168,85,247,0.35),transparent_70%)]" />
+
+                {/* Animated ETHORA AI Copilot Robot Mascot */}
                 <img
-                  src="/ethora-logo.png"
-                  alt="ETHORA AI"
-                  className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]"
+                  src="/ai-copilot-bot.svg"
+                  alt="ETHORA AI Copilot"
+                  className="w-full h-full object-contain relative z-10 group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_10px_rgba(192,132,252,0.9)]"
                 />
-              </div>
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#22C55E] border-2 border-[#14111F] animate-ping" />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#22C55E] border-2 border-[#14111F]" />
-            </div>
 
-            <div className="hidden sm:block text-left pr-1">
-              <div className="flex items-center gap-1.5">
-                <span className="font-exo font-bold text-xs text-[#F4F1FF] leading-none">ETHORA AI</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#A855F7] animate-pulse" />
+                {/* Ambient inner rim highlight */}
+                <div className="absolute inset-0 rounded-full border border-white/20 pointer-events-none" />
               </div>
-              <span className="text-[10px] text-[#B8B3CC] font-normal block mt-0.5">
-                Esports Copilot
-              </span>
-            </div>
-          </button>
+
+              {/* Chat Bubble AI Indicator Badge (Bottom Right) */}
+              <div className="absolute -bottom-1 -right-1 z-20 w-6 h-6 rounded-full bg-gradient-to-br from-[#A855F7] to-[#7E22CE] border-2 border-[#0C0A17] flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                <MessageSquare className="w-3 h-3 text-white fill-white/80" />
+              </div>
+            </button>
+          </div>
         </div>
       )}
 
       {/* EXPANDED AI CHAT WINDOW IN THE BOTTOM-RIGHT CORNER */}
       {isOpen && (
         <div
-          className={`fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] rounded-3xl border border-[rgba(168,85,247,0.35)] bg-[#0A0A12]/98 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
-            isMinimized ? "h-16" : "h-[540px] max-h-[85vh]"
+          className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] w-[calc(100vw-32px)] sm:w-[420px] max-w-[420px] rounded-3xl border border-[rgba(168,85,247,0.35)] bg-[#0A0A12]/98 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+            isMinimized ? "h-16" : "h-[520px] max-h-[82vh]"
           }`}
         >
           {/* 1. CHAT HEADER */}
@@ -305,12 +310,11 @@ You can register directly from the tournament details page with your verified in
               <div className="relative">
                 <div className="w-8 h-8 rounded-xl overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center p-0.5 shadow-md">
                   <img
-                    src="/ethora-logo.png"
+                    src="/ai-copilot-bot.svg"
                     alt="ETHORA AI"
                     className="w-full h-full object-contain filter drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]"
                   />
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#22C55E] border-2 border-[#14111F]" />
               </div>
 
               <div>
@@ -373,7 +377,7 @@ You can register directly from the tournament details page with your verified in
                     ) : (
                       <div className="w-7 h-7 rounded-lg overflow-hidden border border-[rgba(168,85,247,0.5)] bg-[#0A0A12] flex items-center justify-center p-0.5 shrink-0 shadow">
                         <img
-                          src="/ethora-logo.png"
+                          src="/ai-copilot-bot.svg"
                           alt="ETHORA AI"
                           className="w-full h-full object-contain filter drop-shadow-[0_0_4px_rgba(168,85,247,0.6)]"
                         />

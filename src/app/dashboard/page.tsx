@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Trophy,
   Swords,
@@ -37,7 +38,8 @@ import { SUPPORTED_GAMES } from "@/data/games";
 import { GamerDashboardHeader } from "@/components/dashboard/GamerDashboardHeader";
 
 export default function GamerDashboardPage() {
-  const { currentUser, tournaments, connectGameAccount } = useEthora();
+  const router = useRouter();
+  const { currentUser, currentSession, tournaments, connectGameAccount } = useEthora();
   const [connectModalOpen, setConnectModalOpen] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState("game-eafc");
   const [inGameName, setInGameName] = useState("");
@@ -50,7 +52,52 @@ export default function GamerDashboardPage() {
   const [hoveredChartPoint, setHoveredChartPoint] = useState<number | null>(null);
   const [copiedId, setCopiedId] = useState(false);
 
+  // Automatic redirect if non-gamer persona visits the gamer dashboard
+  useEffect(() => {
+    if (!currentUser && currentSession) {
+      if (currentSession.role === "organizer" || currentSession.role === "organization") {
+        router.replace("/organizer");
+      } else if (currentSession.role === "admin") {
+        router.replace("/admin");
+      }
+    }
+  }, [currentUser, currentSession, router]);
+
   if (!currentUser) {
+    if (currentSession?.role === "organizer" || currentSession?.role === "organization") {
+      return (
+        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+          <h2 className="text-2xl font-bold text-white font-sans">Organizer Account Active</h2>
+          <p className="text-slate-400 text-sm mt-2 font-sans">
+            Redirecting to your Organizer Hub...
+          </p>
+          <Link
+            href="/organizer"
+            className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm transition"
+          >
+            Go to Organizer Hub →
+          </Link>
+        </div>
+      );
+    }
+
+    if (currentSession?.role === "admin") {
+      return (
+        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+          <h2 className="text-2xl font-bold text-white font-sans">Administrator Account Active</h2>
+          <p className="text-slate-400 text-sm mt-2 font-sans">
+            Redirecting to Platform Administrator Console...
+          </p>
+          <Link
+            href="/admin"
+            className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm transition"
+          >
+            Go to Admin Console →
+          </Link>
+        </div>
+      );
+    }
+
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <h2 className="text-2xl font-bold text-white font-sans">No Gamer Profile Active</h2>
@@ -59,7 +106,7 @@ export default function GamerDashboardPage() {
         </p>
         <Link
           href="/auth/signup"
-          className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 text-white font-medium text-sm"
+          className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-sm transition"
         >
           Create Gamer Profile
         </Link>

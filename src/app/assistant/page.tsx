@@ -210,8 +210,13 @@ Your ETHORA Passport verifies your eligibility to submit roster applications dir
       <div className="rounded-2xl border border-[#232A42] bg-[#0E111A] p-4 sm:p-5 flex items-center justify-between shadow-xl mb-4 shrink-0">
         <div className="flex items-center gap-3.5">
           <div className="relative">
-            <EthoraEmblem size="md" />
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0E111A] animate-pulse" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden border border-purple-500/50 bg-[#0A0718] flex items-center justify-center p-0.5 shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+              <img
+                src="/ai-copilot-bot.svg"
+                alt="ETHORA AI"
+                className="w-full h-full object-contain filter drop-shadow-[0_0_6px_rgba(168,85,247,0.7)]"
+              />
+            </div>
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -247,8 +252,12 @@ Your ETHORA Passport verifies your eligibility to submit roster applications dir
                 <User className="w-4 h-4" />
               </div>
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-[#141826] border border-violet-500/40 flex items-center justify-center shrink-0 shadow-glow-violet">
-                <EthoraEmblem size="sm" />
+              <div className="w-8 h-8 rounded-lg bg-[#0A0718] border border-violet-500/40 flex items-center justify-center shrink-0 p-0.5 shadow-glow-violet">
+                <img
+                  src="/ai-copilot-bot.svg"
+                  alt="ETHORA AI"
+                  className="w-full h-full object-contain filter drop-shadow-[0_0_4px_rgba(168,85,247,0.7)]"
+                />
               </div>
             )}
 

@@ -39,8 +39,8 @@ export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ child
     setAiChatOpen((prev) => !prev);
   };
 
-  // 1. Landing and Auth pages: standalone full screen, no sidebar
-  if (isLandingPage || isAuthPage) {
+  // 1. Auth pages only: standalone full screen without floating chat distractions
+  if (isAuthPage) {
     return (
       <div className="min-h-screen w-full bg-[#05030a] text-slate-100">
         {children}
@@ -48,7 +48,20 @@ export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ child
     );
   }
 
-  // 2. Unauthenticated visitor viewing allowed public pages (/rankings, /tournaments):
+  // 2. Landing page: standalone esports experience WITH the floating circular AI Chat Copilot!
+  if (isLandingPage) {
+    return (
+      <div className="min-h-screen w-full bg-[#05030a] text-slate-100 relative">
+        {children}
+        <FloatingAIChat
+          isOpen={aiChatOpen}
+          onToggle={handleToggleAIChat}
+        />
+      </div>
+    );
+  }
+
+  // 3. Unauthenticated visitor viewing allowed public pages (/rankings, /tournaments):
   // Clean public header with logo, rankings, tournaments, and sign in button - NO SIDEBAR!
   if (!isAuthenticated) {
     if (!isPublicPage) {
@@ -64,9 +77,13 @@ export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     return (
-      <div className="min-h-screen flex flex-col bg-[#08090E] text-slate-100">
+      <div className="min-h-screen flex flex-col bg-[#08090E] text-slate-100 relative">
         <PublicHeader />
         <main className="flex-1 w-full flex flex-col">{children}</main>
+        <FloatingAIChat
+          isOpen={aiChatOpen}
+          onToggle={handleToggleAIChat}
+        />
       </div>
     );
   }

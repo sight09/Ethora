@@ -4,9 +4,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Users, Trophy, Globe, ChevronDown, Rocket } from "lucide-react";
+import { Users, Trophy, Globe, ChevronDown, Rocket, Crown, Play, Search, Menu, X } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
-import HeroTypingTitle from "@/components/landing/HeroTypingTitle";
 import "./landing.css";
 
 interface Champion {
@@ -225,6 +224,7 @@ export default function EthoraLandingPage() {
   const [isPaused, setIsPaused] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavigateToAuth = (path: string) => (e: React.MouseEvent) => {
     e.preventDefault();
@@ -335,8 +335,21 @@ export default function EthoraLandingPage() {
           <span className="brand-name">ETHORA</span>
         </Link>
 
-        {/* Right Actions: Language + Get Started */}
+        {/* Center Navigation Links (Matching Reference Image) */}
+        <nav className="header-nav" aria-label="Primary navigation">
+          <Link href="#home" className="header-nav-link active">Home</Link>
+          <Link href="/tournaments" className="header-nav-link">Tournaments</Link>
+          <Link href="/rankings" className="header-nav-link">Rankings</Link>
+          <Link href="/gamers" className="header-nav-link">Community</Link>
+          <Link href="/assistant" className="header-nav-link">Support</Link>
+        </nav>
+
+        {/* Right Actions: Search + Language + Get Started */}
         <div className="header-actions">
+          <Link href="/tournaments" className="header-search-btn" aria-label="Search tournaments and rankings">
+            <Search className="w-3.5 h-3.5 text-gray-300" />
+          </Link>
+
           <div className="lang-selector">
             <Globe className="w-3.5 h-3.5 text-gray-300" />
             <span className="lang-text">EN</span>
@@ -351,7 +364,82 @@ export default function EthoraLandingPage() {
             <Rocket className="w-3.5 h-3.5" />
             <span>Get Started</span>
           </Link>
+
+          {/* Mobile Menu Hamburger Toggle Button */}
+          <button
+            type="button"
+            className="mobile-menu-btn"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5 text-white" />
+            ) : (
+              <Menu className="w-5 h-5 text-white" />
+            )}
+          </button>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="mobile-nav-drawer" role="dialog" aria-modal="true">
+            <div className="mobile-nav-links">
+              <Link
+                href="#home"
+                className="mobile-nav-link"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>🏠</span> Home
+              </Link>
+              <Link
+                href="/tournaments"
+                className="mobile-nav-link"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>⚔️</span> Tournaments
+              </Link>
+              <Link
+                href="/rankings"
+                className="mobile-nav-link"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>🏆</span> Rankings
+              </Link>
+              <Link
+                href="/gamers"
+                className="mobile-nav-link"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>👥</span> Community
+              </Link>
+              <Link
+                href="/assistant"
+                className="mobile-nav-link"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span>⚡</span> AI Support
+              </Link>
+            </div>
+
+            <div className="mobile-nav-actions">
+              <Link
+                href="/auth/signin"
+                className="mobile-btn-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Rocket className="w-4 h-4" />
+                <span>Get Started</span>
+              </Link>
+              <Link
+                href="/auth/signin"
+                className="mobile-btn-secondary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign In / Register
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* 2. HERO SECTION */}
@@ -359,10 +447,47 @@ export default function EthoraLandingPage() {
         <div className="hero-art" />
         <div className="hero-overlay" />
         <div className="hero-content">
-          <HeroTypingTitle />
+          {/* 1. Ethiopia's Premier Esports Platform Badge */}
+          <div className="hero-badge">
+            <Crown className="w-3.5 h-3.5 text-[#F5B82E] fill-[#F5B82E]" />
+            <span>Ethiopia&apos;s Premier Esports Platform</span>
+          </div>
+
+          {/* 2. Stylized 3D Metallic Chrome ETHORA Wordmark with Glowing Yellow Star */}
+          <div className="hero-wordmark-wrap">
+            <img
+              src="/images/ethora-hero-wordmark.png"
+              alt="ETHORA"
+              className="hero-wordmark-img"
+            />
+          </div>
+
+          {/* 3. Slanted/Italic Bold Tagline */}
+          <h2 className="hero-tagline">
+            Where Gamers Become Legend
+          </h2>
+
+          {/* 4. Subtitle Description */}
           <p className="hero-subtitle">
-            Compete. Climb. Be the Best. Join ETHORA and show your skills in thrilling tournaments and rankings!
+            Compete. Climb. Be the best. Join ETHORA and show your skills in thrilling tournaments and rankings!
           </p>
+
+          {/* 5. Hero Action Buttons */}
+          <div className="hero-buttons">
+            <Link className="btn-primary" href="/rankings">
+              <span className="btn-trophy-emoji">🏆</span>
+              <span>EXPLORE RANKINGS</span>
+              <span className="btn-arrow">→</span>
+            </Link>
+            <Link className="btn-secondary" href="/tournaments">
+              <span className="play-icon-wrap">
+                <Play className="w-3.5 h-3.5 fill-white text-white ml-0.5" />
+              </span>
+              <span>WATCH TRAILER</span>
+            </Link>
+          </div>
+
+          {/* 6. Active Gamers Social Proof */}
           <div className="community-proof">
             <div className="avatar-stack">
               <img
@@ -391,15 +516,6 @@ export default function EthoraLandingPage() {
               <small>One community. One arena.</small>
             </div>
           </div>
-        </div>
-        {/* Action buttons centered at the horizontal center of the page */}
-        <div className="hero-buttons">
-          <Link className="btn-primary" href="/rankings">
-            <span>🏆</span> Explore Rankings <span>→</span>
-          </Link>
-          <Link className="btn-secondary" href="/tournaments">
-            <span className="play-icon">▶</span> Watch Trailer
-          </Link>
         </div>
         <div className="hero-vertical">
           ETHORA <i /> COMPETE WITHOUT LIMITS
