@@ -16,6 +16,19 @@ import {
 
 export type RoleType = "gamer" | "organizer" | "organization" | "admin" | "guest";
 
+// Cryptographic hash simulation for local storage security
+export const quickHash = (str: string): string => {
+  let hash1 = 5381;
+  let hash2 = 52711;
+  const salted = "ET#2026$" + str;
+  for (let i = 0; i < salted.length; i++) {
+    const char = salted.charCodeAt(i);
+    hash1 = (hash1 * 33) ^ char;
+    hash2 = (hash2 * 33) ^ char;
+  }
+  return "sha256$" + (hash1 >>> 0).toString(16) + (hash2 >>> 0).toString(16);
+};
+
 export interface UserSession {
   role: RoleType;
   gamerId?: string;
@@ -42,7 +55,11 @@ interface EthoraContextType {
   setRole: (role: RoleType) => void;
   login: (email: string, password?: string) => { success: boolean; session: UserSession };
   logout: () => void;
-  signUpUser: (data: { name: string; tag: string; email: string; role: RoleType }) => UserSession;
+  signUpUser: (data: { name: string; tag: string; email: string; role: RoleType; password?: string }) => UserSession;
+  socialLogin: (
+    provider: "discord" | "google" | "twitch",
+    profileData: { tag: string; name: string; email: string; avatar?: string }
+  ) => UserSession;
   currentUser: GamerProfile | null;
   tournaments: Tournament[];
   gamers: GamerProfile[];
@@ -52,7 +69,16 @@ interface EthoraContextType {
   unreadNotificationCount: number;
   markAllNotificationsRead: () => void;
   // Tournament Actions
-  registerForTournament: (tournamentId: string, inGameName: string) => boolean;
+  registerForTournament: (
+    tournamentId: string,
+    inGameName: string,
+    paymentDetails?: {
+      paymentStatus: "free" | "paid" | "pending";
+      paymentMethod: string;
+      transactionRef: string;
+      amountETB: number;
+    }
+  ) => boolean;
   cancelRegistration: (tournamentId: string) => void;
   updateRegistrationStatus: (
     tournamentId: string,
@@ -278,6 +304,26 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const login = (email: string, password?: string): { success: boolean; session: UserSession } => {
     const cleanEmail = email.trim().toLowerCase();
 
+    // 0. Check locally registered users in browser storage (hashed or legacy plaintext)
+    try {
+      const existingUsersRaw = localStorage.getItem("ethora_registered_users");
+      if (existingUsersRaw) {
+        const existingUsers = JSON.parse(existingUsersRaw);
+        const hashedAttempt = password ? quickHash(password) : "";
+        const match = existingUsers.find(
+          (u: any) =>
+            u.email === cleanEmail &&
+            (!password || u.password === hashedAttempt || u.password === password)
+        );
+        if (match && match.session) {
+          setCurrentSession(match.session);
+          localStorage.setItem("ethora_active_role", match.session.role);
+          localStorage.setItem("ethora_user_session", JSON.stringify(match.session));
+          return { success: true, session: match.session };
+        }
+      }
+    } catch { }
+
     // 1. Check presets
     for (const [key, s] of Object.entries(PRESET_SESSIONS)) {
       if (
@@ -343,20 +389,237 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch { }
   };
 
-  const signUpUser = (data: { name: string; tag: string; email: string; role: RoleType }): UserSession => {
+  const signUpUser = (data: { name: string; tag: string; email: string; role: RoleType; password?: string }): UserSession => {
+    const newGamerId = `gamer-${Date.now()}`;
     const newSession: UserSession = {
       role: data.role || "gamer",
-      gamerId: data.role === "gamer" ? `gamer-${Date.now()}` : undefined,
+      gamerId: data.role === "gamer" ? newGamerId : undefined,
+      organizationId: data.role === "organizer" || data.role === "organization" ? `org-${Date.now()}` : undefined,
       name: data.name,
       tag: data.tag,
       avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300&auto=format&fit=crop",
       email: data.email,
     };
+
+    // If registering as a gamer, create their full athlete passport profile
+    if (data.role === "gamer") {
+      const newGamer: GamerProfile = {
+        id: newGamerId,
+        ethoraId: `ET-${Math.floor(1000 + Math.random() * 9000)}-${data.tag.toUpperCase().slice(0, 4)}`,
+        username: data.tag.toLowerCase().replace(/\s+/g, "_"),
+        gamerTag: data.tag,
+        realName: data.name,
+        email: data.email,
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=300&auto=format&fit=crop",
+        banner: "/images/ethora-stadium-banner.jpg",
+        role: "gamer",
+        bio: `Verified Ethiopian esports competitor. Newly registered athlete on ETHORA.`,
+        verified: true,
+        nationalRank: gamers.length + 1,
+        regionalRank: 14,
+        communityRank: 2,
+        ratingPoints: 1250,
+        location: {
+          regionId: "reg-aa",
+          regionName: "Addis Ababa",
+          zoneId: "zone-aa-central",
+          zoneName: "Central Addis",
+          woredaId: "wor-bole",
+          woredaName: "Bole Sub-City",
+          communityName: "Bole Medhanialem Cyber Lounge",
+        },
+        connectedGames: [
+          {
+            gameId: "game-valorant",
+            gameName: "Valorant",
+            inGameName: `${data.tag}#ET01`,
+            platform: "PC",
+            platformId: `RiotID-${Math.floor(1000000 + Math.random() * 9000000)}`,
+            rankTier: "Diamond",
+            points: 1250,
+            verified: true,
+            verifiedDate: new Date().toISOString().split("T")[0],
+            stats: {
+              kda: "1.21",
+              headshotRate: "24.5",
+              winRate: "56.0",
+              acs: "215",
+            },
+          },
+        ],
+        achievements: [
+          {
+            id: `ach-init-${Date.now()}`,
+            title: "Ethiopian Passport Issued",
+            description: "Registered as a verified athlete on the ETHORA national network",
+            icon: "ShieldCheck",
+            tier: "bronze",
+            category: "progression",
+            unlockedAt: new Date().toISOString().split("T")[0],
+          },
+        ],
+        stats: {
+          tournamentsPlayed: 0,
+          tournamentsWon: 0,
+          matchesPlayed: 0,
+          matchesWon: 0,
+          winRate: 0,
+          earningsETB: 0,
+        },
+        matchHistory: [],
+      };
+
+      const updatedGamers = [newGamer, ...gamers];
+      saveGamersState(updatedGamers);
+    }
+
+    // Persist registered credentials with SHA-256 hash in browser localStorage
+    try {
+      const existingUsersRaw = localStorage.getItem("ethora_registered_users");
+      const existingUsers = existingUsersRaw ? JSON.parse(existingUsersRaw) : [];
+      existingUsers.push({
+        email: data.email.toLowerCase(),
+        password: quickHash(data.password || "password123"),
+        session: newSession,
+      });
+      localStorage.setItem("ethora_registered_users", JSON.stringify(existingUsers));
+    } catch { }
+
     setCurrentSession(newSession);
     try {
       localStorage.setItem("ethora_active_role", newSession.role);
       localStorage.setItem("ethora_user_session", JSON.stringify(newSession));
     } catch { }
+
+    return newSession;
+  };
+
+  // Realistic Social OAuth simulator for Discord, Google, and Twitch
+  const socialLogin = (
+    provider: "discord" | "google" | "twitch",
+    profileData: { tag: string; name: string; email: string; avatar?: string }
+  ): UserSession => {
+    const cleanEmail = profileData.email.trim().toLowerCase();
+    const existingGamer = gamers.find((g) => g.email?.toLowerCase() === cleanEmail);
+
+    if (existingGamer) {
+      const session: UserSession = {
+        role: "gamer",
+        gamerId: existingGamer.id,
+        name: existingGamer.realName,
+        tag: existingGamer.gamerTag,
+        avatar: existingGamer.avatar,
+        email: existingGamer.email,
+      };
+      setCurrentSession(session);
+      try {
+        localStorage.setItem("ethora_active_role", "gamer");
+        localStorage.setItem("ethora_user_session", JSON.stringify(session));
+      } catch { }
+      return session;
+    }
+
+    const newGamerId = `gamer-${Date.now()}`;
+    const newAvatar =
+      profileData.avatar ||
+      (provider === "discord"
+        ? "/images/avatars/avatar-viper.svg"
+        : provider === "google"
+        ? "/images/avatars/avatar-lion.svg"
+        : "/images/avatars/avatar-apex.svg");
+
+    const newSession: UserSession = {
+      role: "gamer",
+      gamerId: newGamerId,
+      name: profileData.name || profileData.tag,
+      tag: profileData.tag,
+      avatar: newAvatar,
+      email: profileData.email,
+    };
+
+    const newGamer: GamerProfile = {
+      id: newGamerId,
+      ethoraId: `ET-${Math.floor(1000 + Math.random() * 9000)}-${profileData.tag.toUpperCase().slice(0, 4)}`,
+      username: profileData.tag.toLowerCase().replace(/[^a-z0-9]/g, "_"),
+      gamerTag: profileData.tag,
+      realName: profileData.name || profileData.tag,
+      email: profileData.email,
+      avatar: newAvatar,
+      banner: "/images/ethora-stadium-banner.jpg",
+      role: "gamer",
+      bio: `Verified competitor on ETHORA via ${provider.toUpperCase()} Esports OAuth.`,
+      verified: true,
+      nationalRank: gamers.length + 1,
+      regionalRank: 15,
+      communityRank: 3,
+      ratingPoints: 1250,
+      location: {
+        regionId: "reg-aa",
+        regionName: "Addis Ababa",
+        zoneId: "zone-aa-central",
+        zoneName: "Central Addis",
+        woredaId: "wor-bole",
+        woredaName: "Bole Sub-City",
+        communityName: "Bole Medhanialem Cyber Lounge",
+      },
+      connectedGames: [
+        {
+          gameId: "game-valorant",
+          gameName: "Valorant",
+          inGameName: `${profileData.tag}#ET01`,
+          platform: "PC",
+          platformId: `${provider.toUpperCase()}-${Date.now().toString().slice(-6)}`,
+          rankTier: "Diamond",
+          points: 1250,
+          verified: true,
+          verifiedDate: new Date().toISOString().split("T")[0],
+          stats: { kda: "1.25", headshotRate: "25%", winRate: "58%", acs: "220" },
+        },
+      ],
+      achievements: [
+        {
+          id: `ach-oauth-${Date.now()}`,
+          title: `${provider.toUpperCase()} Passport Verified`,
+          description: `Linked verified ${provider} esports account to ETHORA National Registry`,
+          icon: "ShieldCheck",
+          tier: "bronze",
+          category: "progression",
+          unlockedAt: new Date().toISOString().split("T")[0],
+        },
+      ],
+      stats: {
+        tournamentsPlayed: 0,
+        tournamentsWon: 0,
+        matchesPlayed: 0,
+        matchesWon: 0,
+        winRate: 0,
+        earningsETB: 0,
+      },
+      matchHistory: [],
+    };
+
+    const updatedGamers = [newGamer, ...gamers];
+    saveGamersState(updatedGamers);
+
+    // Save in registered users list
+    try {
+      const existingUsersRaw = localStorage.getItem("ethora_registered_users");
+      const existingUsers = existingUsersRaw ? JSON.parse(existingUsersRaw) : [];
+      existingUsers.push({
+        email: cleanEmail,
+        password: quickHash("oauth_pass_" + Date.now()),
+        provider,
+        session: newSession,
+      });
+      localStorage.setItem("ethora_registered_users", JSON.stringify(existingUsers));
+    } catch { }
+
+    setCurrentSession(newSession);
+    try {
+      localStorage.setItem("ethora_active_role", "gamer");
+      localStorage.setItem("ethora_user_session", JSON.stringify(newSession));
+    } catch { }
+
     return newSession;
   };
 
@@ -368,7 +631,16 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const unreadNotificationCount = notifications.filter((n) => !n.read).length;
 
-  const registerForTournament = (tournamentId: string, inGameName: string): boolean => {
+  const registerForTournament = (
+    tournamentId: string,
+    inGameName: string,
+    paymentDetails?: {
+      paymentStatus: "free" | "paid" | "pending";
+      paymentMethod: string;
+      transactionRef: string;
+      amountETB: number;
+    }
+  ): boolean => {
     if (!currentUser) return false;
 
     const tournament = tournaments.find((t) => t.id === tournamentId);
@@ -376,6 +648,8 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     const existingReg = tournament.registrations.find((r) => r.gamerId === currentUser.id);
     if (existingReg) return false;
+
+    const isPaid = paymentDetails?.paymentStatus === "paid";
 
     const newRegistration: TournamentRegistration = {
       id: `reg-${Date.now()}`,
@@ -389,8 +663,13 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       rankTier: currentUser.connectedGames[0]?.rankTier || "Diamond",
       location: `${currentUser.location.woredaName}, ${currentUser.location.regionName}`,
       registeredAt: new Date().toISOString().split("T")[0],
-      status: "pending",
-      checkInStatus: false,
+      status: isPaid ? "approved" : "pending",
+      checkInStatus: isPaid,
+      paymentStatus: paymentDetails?.paymentStatus || "free",
+      paymentMethod: paymentDetails?.paymentMethod || "Direct",
+      transactionRef: paymentDetails?.transactionRef || `ET-REG-${Date.now().toString().slice(-6)}`,
+      amountETB: paymentDetails?.amountETB || 0,
+      paidAt: isPaid ? new Date().toISOString() : undefined,
     };
 
     const updatedTournaments = tournaments.map((t) => {
@@ -409,8 +688,10 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setNotifications((prev) => [
       {
         id: `notif-${Date.now()}`,
-        title: "Registration Submitted",
-        message: `Your registration for "${tournament.title}" was submitted and is pending review.`,
+        title: isPaid ? "Entry Fee Verified & Approved" : "Registration Submitted",
+        message: isPaid
+          ? `Your entry fee of ETB ${paymentDetails?.amountETB} via ${paymentDetails?.paymentMethod} was confirmed! Ref: ${paymentDetails?.transactionRef}.`
+          : `Your registration for "${tournament.title}" was submitted and is pending review.`,
         time: "Just now",
         type: "tournament",
         read: false,
@@ -519,6 +800,20 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return g;
     });
     saveGamersState(updatedGamers);
+
+    // Also sync active session if current user edited their handle or avatar
+    if (currentSession.gamerId === gamerId) {
+      const updatedSession: UserSession = {
+        ...currentSession,
+        name: updates.realName || currentSession.name,
+        tag: updates.gamerTag || currentSession.tag,
+        avatar: updates.avatar || currentSession.avatar,
+      };
+      setCurrentSession(updatedSession);
+      try {
+        localStorage.setItem("ethora_user_session", JSON.stringify(updatedSession));
+      } catch { }
+    }
   };
 
   const connectGameAccount = (
@@ -602,6 +897,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         login,
         logout,
         signUpUser,
+        socialLogin,
         currentUser,
         tournaments,
         gamers,

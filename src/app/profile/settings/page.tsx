@@ -10,13 +10,19 @@ import {
   Save,
   ArrowLeft,
   CheckCircle2,
+  Upload,
+  Sparkles,
+  Camera,
 } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
 import { ETHIOPIA_GEOGRAPHY, getZonesByRegion, getWoredasByZone } from "@/data/geography";
+import { compressAndEncodeImage, PRESET_AVATARS } from "@/lib/imageUpload";
 
 export default function ProfileSettingsPage() {
   const { currentUser, updateGamerProfile } = useEthora();
 
+  const [avatar, setAvatar] = useState(currentUser?.avatar || "/images/avatars/avatar-viper.svg");
+  const [isCompressing, setIsCompressing] = useState(false);
   const [gamerTag, setGamerTag] = useState(currentUser?.gamerTag || "ViperX");
   const [realName, setRealName] = useState(currentUser?.realName || "Yared Tadesse");
   const [bio, setBio] = useState(currentUser?.bio || "");
@@ -31,6 +37,24 @@ export default function ProfileSettingsPage() {
   const zones = getZonesByRegion(regionId);
   const woredas = getWoredasByZone(regionId, zoneId);
 
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsCompressing(true);
+      const compressed = await compressAndEncodeImage(file, {
+        maxWidth: 300,
+        maxHeight: 300,
+        quality: 0.85,
+      });
+      setAvatar(compressed);
+    } catch (err) {
+      console.error("Failed to compress avatar", err);
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -40,6 +64,7 @@ export default function ProfileSettingsPage() {
     const currentWoreda = woredas.find((w) => w.id === woredaId);
 
     updateGamerProfile(currentUser.id, {
+      avatar,
       gamerTag,
       realName,
       bio,
@@ -88,8 +113,69 @@ export default function ProfileSettingsPage() {
       <form onSubmit={handleSave} className="rounded-2xl border border-[#232A42] bg-[#0E111A] p-6 sm:p-8 space-y-6 shadow-2xl">
         <div className="space-y-4">
           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300 font-mono">
-            Gamer Identity
+            Gamer Identity &amp; Avatar
           </h2>
+
+          {/* AVATAR UPLOAD & PRESET PICKER */}
+          <div className="p-4 rounded-xl border border-purple-500/20 bg-[#141829]/60 space-y-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-purple-500/60 bg-[#0C0918] shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+                  <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[#0E111A]" />
+              </div>
+
+              <div className="space-y-1.5 flex-1 text-center sm:text-left">
+                <h3 className="text-xs font-bold text-white uppercase font-mono tracking-wider">
+                  Profile Avatar &amp; Crest
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  Select a local Ethiopian cyberpunk preset or upload your custom logo/avatar (auto-compressed to lightweight WebP &lt;50KB).
+                </p>
+                <div className="pt-1 flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/40 text-purple-200 text-xs font-bold transition">
+                    <Camera className="w-3.5 h-3.5 text-purple-400" />
+                    <span>{isCompressing ? "Compressing..." : "Upload File"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Presets Grid */}
+            <div>
+              <span className="text-[10px] font-bold uppercase font-mono tracking-wider text-slate-400 block mb-2">
+                Offline Cyberpunk Presets
+              </span>
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                {PRESET_AVATARS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setAvatar(p.path)}
+                    className={`relative p-1 rounded-xl border flex flex-col items-center gap-1 transition ${
+                      avatar === p.path
+                        ? "border-purple-400 bg-purple-600/20 shadow-[0_0_10px_rgba(168,85,247,0.4)]"
+                        : "border-[#232A42] bg-[#0E111A] hover:border-slate-600"
+                    }`}
+                  >
+                    <div className="w-9 h-9 rounded-lg overflow-hidden bg-black/40">
+                      <img src={p.path} alt={p.name} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[9px] text-slate-300 truncate w-full text-center">
+                      {p.name.split(" ")[0]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

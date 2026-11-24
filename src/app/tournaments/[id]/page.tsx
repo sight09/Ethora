@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
 import { formatETB } from "@/lib/utils";
+import { EthiopianCheckoutModal } from "@/components/tournament/EthiopianCheckoutModal";
 
 export default function TournamentDetailPage() {
   const params = useParams();
@@ -464,9 +465,9 @@ export default function TournamentDetailPage() {
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 space-y-1">
                     <span
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase block ${
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase inline-block ${
                         reg.status === "approved"
                           ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                           : reg.status === "pending"
@@ -476,7 +477,12 @@ export default function TournamentDetailPage() {
                     >
                       {reg.status}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono block mt-1">
+                    {reg.paymentStatus === "paid" && (
+                      <span className="text-[10px] text-cyan-300 font-mono font-bold block">
+                        ✓ {reg.paymentMethod?.split(" ")[0] || "PAID"}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-slate-400 font-mono block">
                       {reg.rankTier}
                     </span>
                   </div>
@@ -543,62 +549,22 @@ export default function TournamentDetailPage() {
         )}
       </div>
 
-      {/* REGISTRATION MODAL */}
-      {registerModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="max-w-md w-full rounded-2xl border border-[#232A42] bg-[#0E111A] p-6 space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white font-mono flex items-center gap-2">
-                <Swords className="w-5 h-5 text-violet-400" />
-                Tournament Registration
-              </h3>
-              <button
-                onClick={() => setRegisterModalOpen(false)}
-                className="text-slate-400 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleRegisterSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-300 mb-1">
-                  Confirm In-Game Name (IGN) for {tournament.gameName}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={inGameName}
-                  onChange={(e) => setInGameName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-white text-sm font-mono"
-                  placeholder="e.g. ViperX#ET01"
-                />
-              </div>
-
-              <div className="p-3 rounded-xl bg-violet-950/20 border border-violet-500/30 text-xs text-slate-300 leading-relaxed">
-                By submitting your registration, your team will be entered into the organizer review queue. You will
-                receive check-in notifications before matches begin.
-              </div>
-
-              <div className="pt-2 flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRegisterModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-slate-300 text-xs font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs uppercase"
-                >
-                  Submit Registration
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* ETHIOPIAN TELEBIRR & CBE BIRR CHECKOUT & DIGITAL ENTRY PASS MODAL */}
+      <EthiopianCheckoutModal
+        isOpen={registerModalOpen}
+        onClose={() => setRegisterModalOpen(false)}
+        tournament={tournament}
+        gamerTag={currentUser?.gamerTag || "Competitor"}
+        initialInGameName={inGameName}
+        onConfirmRegistration={(paymentDetails) => {
+          registerForTournament(tournament.id, paymentDetails.inGameName, {
+            paymentStatus: paymentDetails.paymentStatus,
+            paymentMethod: paymentDetails.paymentMethod,
+            transactionRef: paymentDetails.transactionRef,
+            amountETB: paymentDetails.amountETB,
+          });
+        }}
+      />
 
       {/* SCORE RECORDING MODAL (FOR ORGANIZERS) */}
       {scoreModalMatch && (

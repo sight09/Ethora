@@ -24,12 +24,14 @@ import { useEthora } from "@/context/EthoraContext";
 import { SUPPORTED_GAMES } from "@/data/games";
 import { ETHIOPIA_GEOGRAPHY } from "@/data/geography";
 import { formatETB } from "@/lib/utils";
+import { compressAndEncodeImage, PRESET_BANNERS } from "@/lib/imageUpload";
 
 export default function CreateTournamentWizardPage() {
   const router = useRouter();
   const { createTournament, currentSession } = useEthora();
 
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isCompressingBanner, setIsCompressingBanner] = useState(false);
 
   // Wizard state
   const [title, setTitle] = useState("Ethiopian Cyber Arena Series 2026");
@@ -57,10 +59,26 @@ export default function CreateTournamentWizardPage() {
   const [newRule, setNewRule] = useState("");
   const [maxParticipants, setMaxParticipants] = useState(16);
   const [prizePoolETB, setPrizePoolETB] = useState(150000);
-  const [entryFeeETB, setEntryFeeETB] = useState(0);
-  const [bannerUrl, setBannerUrl] = useState(
-    "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop"
-  );
+  const [entryFeeETB, setEntryFeeETB] = useState(250);
+  const [bannerUrl, setBannerUrl] = useState("/images/ethora-stadium-banner.jpg");
+
+  const handleBannerFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsCompressingBanner(true);
+      const compressed = await compressAndEncodeImage(file, {
+        maxWidth: 1200,
+        maxHeight: 450,
+        quality: 0.85,
+      });
+      setBannerUrl(compressed);
+    } catch (err) {
+      console.error("Banner compression failed", err);
+    } finally {
+      setIsCompressingBanner(false);
+    }
+  };
 
   const selectedGame = SUPPORTED_GAMES.find((g) => g.id === gameId) || SUPPORTED_GAMES[0];
 
@@ -501,22 +519,94 @@ export default function CreateTournamentWizardPage() {
 
         {/* STEP 8: BANNER & BRANDING */}
         {currentStep === 8 && (
-          <div className="space-y-4">
-            <h3 className="text-base font-bold text-white font-mono">Step 8: Tournament Presentation</h3>
+          <div className="space-y-5">
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-300 mb-1">Banner Image URL</label>
-              <input
-                type="text"
-                value={bannerUrl}
-                onChange={(e) => setBannerUrl(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-white text-xs font-mono"
-              />
+              <h3 className="text-base font-bold text-white font-mono">Step 8: Tournament Presentation &amp; Arena Banner</h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Choose an official local esports venue backdrop or upload a custom compressed arena banner.
+              </p>
             </div>
 
-            <div className="relative h-44 rounded-xl overflow-hidden border border-[#232A42]">
-              <img src={bannerUrl} alt="Preview" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
-                <span className="font-mono text-sm font-bold text-white">{title}</span>
+            {/* Offline Presets */}
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-300 mb-2">
+                Official Ethiopian Esports Backdrops
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {PRESET_BANNERS.map((pb) => (
+                  <button
+                    key={pb.id}
+                    type="button"
+                    onClick={() => setBannerUrl(pb.path)}
+                    className={`relative rounded-xl overflow-hidden border text-left p-2 transition ${
+                      bannerUrl === pb.path
+                        ? "border-purple-400 bg-purple-900/20 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+                        : "border-[#232A42] bg-[#141826] hover:border-slate-500"
+                    }`}
+                  >
+                    <div className="h-20 w-full rounded-lg overflow-hidden bg-black mb-2">
+                      <img src={pb.path} alt={pb.name} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-xs font-bold text-white block truncate">{pb.name}</span>
+                    <span className="text-[10px] text-purple-300">Local Verified</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Upload or URL */}
+            <div className="p-4 rounded-xl border border-purple-500/20 bg-[#141829]/60 space-y-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase font-mono">Upload Custom Banner</h4>
+                  <p className="text-[11px] text-slate-400">
+                    Automatically compressed on client canvas to high-performance WebP (&lt;50KB).
+                  </p>
+                </div>
+                <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold font-mono transition shadow-lg shadow-purple-600/30">
+                  <ImageIcon className="w-4 h-4" />
+                  <span>{isCompressingBanner ? "Processing..." : "Select Banner Image"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBannerFileChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase text-slate-400 mb-1">Or direct Image URL</label>
+                <input
+                  type="text"
+                  value={bannerUrl}
+                  onChange={(e) => setBannerUrl(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-[#232A42] bg-[#141826] text-white text-xs font-mono"
+                />
+              </div>
+            </div>
+
+            {/* Live Banner Preview with Tournament Badge */}
+            <div>
+              <span className="text-xs font-bold uppercase text-slate-400 block mb-1.5 font-mono">
+                Live Broadcast Stage Preview
+              </span>
+              <div className="relative h-48 sm:h-56 rounded-2xl overflow-hidden border-2 border-purple-500/40 shadow-2xl">
+                <img src={bannerUrl} alt="Preview" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 rounded-full bg-purple-600/80 text-white text-[10px] font-bold font-mono uppercase">
+                      {selectedGame.name}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-black/60 text-cyan-300 text-[10px] font-bold font-mono">
+                      {startsAt}
+                    </span>
+                  </div>
+                  <h2 className="font-mono text-lg sm:text-xl font-black text-white drop-shadow-md">
+                    {title}
+                  </h2>
+                  <p className="text-xs text-slate-300 line-clamp-1">{venueName}</p>
+                </div>
               </div>
             </div>
           </div>

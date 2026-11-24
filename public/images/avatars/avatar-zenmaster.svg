@@ -1,0 +1,21 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="zen-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#131B2E"/>
+      <stop offset="100%" stop-color="#050811"/>
+    </radialGradient>
+    <linearGradient id="zen-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="62" fill="url(#zen-bg)" stroke="#6366F1" stroke-width="3"/>
+  <circle cx="64" cy="50" r="22" fill="url(#zen-grad)"/>
+  <!-- Cyber Hood / Mask -->
+  <path d="M42 42 C42 28 86 28 86 42 L86 64 C86 70 76 74 64 74 C52 74 42 70 42 64 Z" fill="#1E293B" opacity="0.85"/>
+  <!-- Glowing eye slits -->
+  <ellipse cx="55" cy="52" rx="4" ry="2" fill="#38BDF8"/>
+  <ellipse cx="73" cy="52" rx="4" ry="2" fill="#38BDF8"/>
+  <!-- Tactical Collar -->
+  <path d="M28 108 C30 86 46 82 64 82 C82 82 98 86 100 108 Z" fill="url(#zen-grad)"/>
+</svg>

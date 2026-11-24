@@ -1,0 +1,20 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="apex-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1E1035"/>
+      <stop offset="100%" stop-color="#080314"/>
+    </radialGradient>
+    <linearGradient id="apex-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="62" fill="url(#apex-bg)" stroke="#EC4899" stroke-width="3"/>
+  <!-- Apex Helm -->
+  <polygon points="64,22 88,44 80,78 48,78 40,44" fill="url(#apex-grad)"/>
+  <polygon points="64,36 78,50 72,66 56,66 50,50" fill="#080314"/>
+  <!-- Neon Visor Beam -->
+  <line x1="48" y1="52" x2="80" y2="52" stroke="#F43F5E" stroke-width="4" stroke-linecap="round"/>
+  <!-- Shoulder armor -->
+  <path d="M24 108 L40 84 L88 84 L104 108 Z" fill="url(#apex-grad)"/>
+</svg>

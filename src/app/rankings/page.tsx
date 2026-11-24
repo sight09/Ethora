@@ -71,122 +71,134 @@ export default function RankingsPage() {
   const top3 = filteredGamers[2];
 
   return (
-    <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+    <div className="flex-1 max-w-7xl mx-auto w-full px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-10">
       {/* 1. HEADER */}
-      <div className="relative rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-8 overflow-hidden shadow-2xl">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#F5B82E]/40 bg-[#F5B82E]/10 text-[#F5B82E] text-xs font-[600] uppercase tracking-wider">
-              <Trophy className="w-3.5 h-3.5" />
+      <div className="relative rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-4 sm:p-6 md:p-8 overflow-hidden shadow-2xl">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border border-[#F5B82E]/40 bg-[#F5B82E]/10 text-[#F5B82E] text-[10px] sm:text-xs font-[600] uppercase tracking-wider">
+              <Trophy className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               Official Ethiopian National Circuit
             </div>
-            <h1 className="text-[44px] font-[800] text-[#F4F1FF] tracking-tight uppercase leading-none">
+            <h1 className="text-2xl sm:text-3xl md:text-[44px] font-[800] text-[#F4F1FF] tracking-tight uppercase leading-tight sm:leading-none">
               NATIONAL LEADERBOARDS
             </h1>
-            <p className="text-[16px] font-[400] text-[#B8B3CC] max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm md:text-[16px] font-[400] text-[#B8B3CC] max-w-2xl leading-relaxed">
               Transparent, verified competitive rankings across all Ethiopian regions, zones, and local gaming hubs.
               Points are calculated through sanctioned tournament results and official match records.
             </p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="p-4 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#0A0A12] text-right">
-              <span className="text-[12px] font-[600] uppercase tracking-[0.2em] text-[#7D7896] block">
+            <div className="p-3 sm:p-4 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#0A0A12] text-right">
+              <span className="text-[10px] sm:text-[12px] font-[600] uppercase tracking-[0.2em] text-[#7D7896] block">
                 Active Ranked Athletes
               </span>
-              <span className="text-2xl font-[700] text-[#F4F1FF] tabular-nums">48,200+</span>
+              <span className="text-lg sm:text-2xl font-[700] text-[#F4F1FF] tabular-nums">48,200+</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. TOP 3 PODIUM */}
+      {/* 2. TOP 3 PODIUM - 3 COLUMNS ACROSS MOBILE & DESKTOP */}
       {filteredGamers.length >= 3 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end max-w-4xl mx-auto pt-4">
-          {/* #2 Silver */}
-          <div className="rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 text-center flex flex-col items-center hover:border-slate-400 transition relative">
-            <div className="relative mb-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 items-end max-w-4xl mx-auto pt-4 px-0.5 sm:px-0">
+          {/* #2 Silver (Left) */}
+          <div className="rounded-xl sm:rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-2.5 xs:p-3 sm:p-5 md:p-6 text-center flex flex-col items-center hover:border-slate-400 transition relative">
+            <div className="relative mb-2 sm:mb-3">
               <img
                 src={top2.avatar}
                 alt={top2.gamerTag}
-                className="w-20 h-20 rounded-2xl object-cover border-2 border-slate-300"
+                className="w-12 h-12 xs:w-14 xs:h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-xl sm:rounded-2xl object-cover border-2 border-slate-300"
               />
-              <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-slate-300 text-slate-950 font-[700] text-[14px] flex items-center justify-center shadow">
+              <span className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-slate-300 text-slate-950 font-[700] text-[11px] sm:text-[14px] flex items-center justify-center shadow">
                 #2
               </span>
             </div>
             <Link
               href={`/profile/${top2.id}`}
-              className="text-[24px] font-[700] text-[#F4F1FF] hover:text-[#A855F7] transition"
+              className="text-xs xs:text-sm sm:text-lg md:text-[24px] font-[700] text-[#F4F1FF] hover:text-[#A855F7] transition truncate w-full"
             >
               {top2.gamerTag}
             </Link>
-            <p className="text-[13px] font-[400] text-[#7D7896] mt-0.5">{top2.realName}</p>
-            <div className="mt-3 px-3 py-1 rounded-full text-[16px] font-[700] tabular-nums bg-slate-800 text-[#F4F1FF]">
+            <p className="text-[10px] sm:text-[13px] font-[400] text-[#7D7896] mt-0.5 truncate w-full hidden xs:block">
+              {top2.realName}
+            </p>
+            <div className="mt-1.5 sm:mt-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-xs sm:text-[16px] font-[700] tabular-nums bg-slate-800 text-[#F4F1FF] whitespace-nowrap">
               {top2.ratingPoints} PTS
             </div>
-            <p className="text-[13px] font-[400] text-[#7D7896] mt-2">{top2.location.regionName}</p>
+            <p className="text-[10px] sm:text-[13px] font-[400] text-[#7D7896] mt-1 sm:mt-2 truncate w-full hidden sm:block">
+              {top2.location.regionName}
+            </p>
           </div>
 
-          {/* #1 Gold - Elevated */}
-          <div className="rounded-2xl border-2 border-[#F5B82E]/70 bg-gradient-to-b from-[#1E1730] to-[#14111F] p-8 text-center flex flex-col items-center shadow-[0_0_30px_rgba(245,184,46,0.25)] relative -translate-y-4">
-            <div className="absolute -top-3 px-4 py-0.5 rounded-full bg-[#F5B82E] text-[#0A0A12] text-[11px] font-[700] uppercase tracking-wider flex items-center gap-1 shadow">
-              <Crown className="w-3.5 h-3.5" />
-              National Apex Leader
+          {/* #1 Gold - Elevated Champion (Center) */}
+          <div className="rounded-xl sm:rounded-2xl border-2 border-[#F5B82E]/80 bg-gradient-to-b from-[#1E1730] to-[#14111F] p-3 xs:p-4 sm:p-6 md:p-8 text-center flex flex-col items-center shadow-[0_0_30px_rgba(245,184,46,0.25)] relative -translate-y-2 sm:-translate-y-4">
+            <div className="absolute -top-2.5 sm:-top-3 px-2 sm:px-4 py-0.5 rounded-full bg-[#F5B82E] text-[#0A0A12] text-[9px] sm:text-[11px] font-[700] uppercase tracking-wider flex items-center gap-1 shadow whitespace-nowrap">
+              <Crown className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+              <span>APEX LEADER</span>
             </div>
-            <div className="relative mb-4 mt-2">
+            <div className="relative mb-2 sm:mb-4 mt-1 sm:mt-2">
               <img
                 src={top1.avatar}
                 alt={top1.gamerTag}
-                className="w-24 h-24 rounded-2xl object-cover border-4 border-[#F5B82E] shadow-2xl"
+                className="w-14 h-14 xs:w-18 xs:h-18 sm:w-22 sm:h-22 md:w-24 md:h-24 rounded-xl sm:rounded-2xl object-cover border-2 sm:border-4 border-[#F5B82E] shadow-2xl"
               />
-              <span className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#F5B82E] text-[#0A0A12] font-[700] text-[14px] flex items-center justify-center shadow-lg">
+              <span className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#F5B82E] text-[#0A0A12] font-[700] text-[12px] sm:text-[14px] flex items-center justify-center shadow-lg">
                 #1
               </span>
             </div>
             <Link
               href={`/profile/${top1.id}`}
-              className="text-[24px] font-[700] text-[#F4F1FF] hover:text-[#F5B82E] transition"
+              className="text-xs xs:text-base sm:text-xl md:text-[24px] font-[700] text-[#F4F1FF] hover:text-[#F5B82E] transition truncate w-full"
             >
               {top1.gamerTag}
             </Link>
-            <p className="text-[13px] font-[400] text-[#B8B3CC] mt-0.5">{top1.realName}</p>
-            <div className="mt-3 px-4 py-1.5 rounded-full text-[16px] font-[700] tabular-nums bg-[#F5B82E]/20 text-[#F5B82E] border border-[#F5B82E]/40">
+            <p className="text-[10px] sm:text-[13px] font-[400] text-[#B8B3CC] mt-0.5 truncate w-full hidden xs:block">
+              {top1.realName}
+            </p>
+            <div className="mt-1.5 sm:mt-3 px-2 sm:px-4 py-0.5 sm:py-1.5 rounded-full text-[11px] xs:text-xs sm:text-[16px] font-[700] tabular-nums bg-[#F5B82E]/20 text-[#F5B82E] border border-[#F5B82E]/40 whitespace-nowrap">
               {top1.ratingPoints} PTS
             </div>
-            <p className="text-[13px] font-[400] text-[#7D7896] mt-2">{top1.location.communityName}</p>
+            <p className="text-[10px] sm:text-[13px] font-[400] text-[#7D7896] mt-1 sm:mt-2 truncate w-full hidden sm:block">
+              {top1.location.communityName || top1.location.regionName}
+            </p>
           </div>
 
-          {/* #3 Bronze */}
-          <div className="rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-6 text-center flex flex-col items-center hover:border-[#F97316] transition relative">
-            <div className="relative mb-3">
+          {/* #3 Bronze (Right) */}
+          <div className="rounded-xl sm:rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-2.5 xs:p-3 sm:p-5 md:p-6 text-center flex flex-col items-center hover:border-[#F97316] transition relative">
+            <div className="relative mb-2 sm:mb-3">
               <img
                 src={top3.avatar}
                 alt={top3.gamerTag}
-                className="w-20 h-20 rounded-2xl object-cover border-2 border-[#F97316]"
+                className="w-12 h-12 xs:w-14 xs:h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-xl sm:rounded-2xl object-cover border-2 border-[#F97316]"
               />
-              <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-[#F97316] text-[#0A0A12] font-[700] text-[14px] flex items-center justify-center shadow">
+              <span className="absolute -top-1.5 -right-1.5 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-[#F97316] text-[#0A0A12] font-[700] text-[11px] sm:text-[14px] flex items-center justify-center shadow">
                 #3
               </span>
             </div>
             <Link
               href={`/profile/${top3.id}`}
-              className="text-[24px] font-[700] text-[#F4F1FF] hover:text-[#F97316] transition"
+              className="text-xs xs:text-sm sm:text-lg md:text-[24px] font-[700] text-[#F4F1FF] hover:text-[#F97316] transition truncate w-full"
             >
               {top3.gamerTag}
             </Link>
-            <p className="text-[13px] font-[400] text-[#7D7896] mt-0.5">{top3.realName}</p>
-            <div className="mt-3 px-3 py-1 rounded-full text-[16px] font-[700] tabular-nums bg-[#F97316]/20 text-[#F97316] border border-[#F97316]/40">
+            <p className="text-[10px] sm:text-[13px] font-[400] text-[#7D7896] mt-0.5 truncate w-full hidden xs:block">
+              {top3.realName}
+            </p>
+            <div className="mt-1.5 sm:mt-3 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-xs sm:text-[16px] font-[700] tabular-nums bg-[#F97316]/20 text-[#F97316] border border-[#F97316]/40 whitespace-nowrap">
               {top3.ratingPoints} PTS
             </div>
-            <p className="text-[13px] font-[400] text-[#7D7896] mt-2">{top3.location.regionName}</p>
+            <p className="text-[10px] sm:text-[13px] font-[400] text-[#7D7896] mt-1 sm:mt-2 truncate w-full hidden sm:block">
+              {top3.location.regionName}
+            </p>
           </div>
         </div>
       )}
 
       {/* 3. FILTER & SEARCH CONTROLS */}
-      <div className="rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-5 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+      <div className="rounded-2xl border border-[rgba(168,85,247,0.25)] bg-[#14111F] p-3.5 sm:p-5 space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-2.5 sm:gap-4 items-center">
           {/* Search */}
           <div className="md:col-span-5 relative">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">

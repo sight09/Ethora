@@ -116,6 +116,11 @@ export interface TournamentRegistration {
   registeredAt: string;
   status: "pending" | "approved" | "rejected" | "waitlisted";
   checkInStatus: boolean;
+  paymentStatus?: "free" | "paid" | "pending";
+  paymentMethod?: string;
+  transactionRef?: string;
+  amountETB?: number;
+  paidAt?: string;
 }
 
 export interface Tournament {

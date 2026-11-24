@@ -1,0 +1,24 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="lion-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#241708"/>
+      <stop offset="100%" stop-color="#090502"/>
+    </radialGradient>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="62" fill="url(#lion-bg)" stroke="#F59E0B" stroke-width="3"/>
+  <!-- Mane -->
+  <path d="M34 50 Q64 18 94 50 Q110 78 88 100 Q64 116 40 100 Q18 78 34 50 Z" fill="#B45309" opacity="0.4"/>
+  <!-- Head -->
+  <circle cx="64" cy="54" r="22" fill="url(#gold-grad)"/>
+  <!-- Eyes -->
+  <ellipse cx="56" cy="52" rx="3" ry="2" fill="#090502"/>
+  <ellipse cx="72" cy="52" rx="3" ry="2" fill="#090502"/>
+  <!-- Crown / Esports tiara -->
+  <polygon points="46,34 54,42 64,28 74,42 82,34 80,44 48,44" fill="#FDE68A"/>
+  <!-- Shoulders -->
+  <path d="M28 108 C30 84 46 80 64 80 C82 80 98 84 100 108 Z" fill="url(#gold-grad)"/>
+</svg>

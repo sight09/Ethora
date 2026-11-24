@@ -1,0 +1,17 @@
+<svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="hab-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#141E16"/>
+      <stop offset="100%" stop-color="#040905"/>
+    </radialGradient>
+  </defs>
+  <circle cx="64" cy="64" r="62" fill="url(#hab-bg)" stroke="#10B981" stroke-width="3"/>
+  <!-- Ethiopian Tri-color Emblem Disc -->
+  <circle cx="64" cy="52" r="26" fill="#10B981"/>
+  <path d="M38 52 A26 26 0 0 0 90 52 Z" fill="#F59E0B"/>
+  <path d="M42 62 A26 26 0 0 0 86 62 Z" fill="#EF4444"/>
+  <!-- Star of Ethiopia -->
+  <polygon points="64,38 67,46 76,46 69,51 72,59 64,54 56,59 59,51 52,46 61,46" fill="#FFFFFF"/>
+  <!-- Shoulders -->
+  <path d="M26 108 C30 84 46 80 64 80 C82 80 98 84 102 108 Z" fill="#065F46"/>
+</svg>

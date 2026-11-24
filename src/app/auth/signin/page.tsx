@@ -22,10 +22,14 @@ import {
 } from "lucide-react";
 import { useEthora, DEMO_ACCOUNTS, DemoAccount, RoleType } from "@/context/EthoraContext";
 import { InteractiveAuthMascot } from "@/components/auth/InteractiveAuthMascot";
+import { OAuthModal } from "@/components/auth/OAuthModal";
 
 export default function SignInPage() {
   const router = useRouter();
   const { login, signUpUser } = useEthora();
+
+  // Social OAuth Simulation state
+  const [oauthProvider, setOauthProvider] = useState<"discord" | "google" | "twitch" | null>(null);
 
   // Mode: "login" or "register"
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
@@ -482,10 +486,7 @@ export default function SignInPage() {
                     {/* Google */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setEmail("yared.viper@ethora.et");
-                        setPassword("password123");
-                      }}
+                      onClick={() => setOauthProvider("google")}
                       className="py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl border border-purple-900/60 bg-[#060411] hover:bg-[#120b29] hover:border-purple-500/70 text-slate-200 hover:text-white transition flex items-center justify-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-semibold cursor-pointer"
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
@@ -512,10 +513,7 @@ export default function SignInPage() {
                     {/* Discord */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setEmail("yared.viper@ethora.et");
-                        setPassword("password123");
-                      }}
+                      onClick={() => setOauthProvider("discord")}
                       className="py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl border border-purple-900/60 bg-[#060411] hover:bg-[#120b29] hover:border-[#5865F2]/70 text-slate-200 hover:text-white transition flex items-center justify-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-semibold cursor-pointer"
                     >
                       <svg className="w-3.5 h-3.5 fill-[#5865F2]" viewBox="0 0 24 24">
@@ -527,10 +525,7 @@ export default function SignInPage() {
                     {/* Twitch */}
                     <button
                       type="button"
-                      onClick={() => {
-                        setEmail("yared.viper@ethora.et");
-                        setPassword("password123");
-                      }}
+                      onClick={() => setOauthProvider("twitch")}
                       className="py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl border border-purple-900/60 bg-[#060411] hover:bg-[#120b29] hover:border-[#9146FF]/70 text-slate-200 hover:text-white transition flex items-center justify-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-semibold cursor-pointer"
                     >
                       <svg className="w-3.5 h-3.5 fill-[#9146FF]" viewBox="0 0 24 24">
@@ -685,6 +680,13 @@ export default function SignInPage() {
 
       {/* Bottom subtle edge */}
       <div className="h-2 pointer-events-none" />
+
+      {/* Simulated Interactive Social OAuth Modal */}
+      <OAuthModal
+        isOpen={!!oauthProvider}
+        provider={oauthProvider || "discord"}
+        onClose={() => setOauthProvider(null)}
+      />
     </div>
   );
 }
