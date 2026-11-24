@@ -112,10 +112,10 @@ const EthoraContext = createContext<EthoraContextType | undefined>(undefined);
 export const PRESET_SESSIONS: Record<RoleType, UserSession> = {
   gamer: {
     role: "gamer",
-    gamerId: "gamer-1",
+    gamerId: "gamer-viper",
     name: "Yared Tadesse",
     tag: "ViperX",
-    avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=300&auto=format&fit=crop",
+    avatar: "/images/avatars/avatar-viper.svg",
     email: "yared.viper@ethora.et",
   },
   organizer: {
@@ -277,6 +277,57 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } finally {
       setIsInitialized(true);
     }
+
+    // Hydrate & Sync from local SQLite Database (prisma/ethora.db)
+    fetch("/api/tournaments")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.tournaments) && data.tournaments.length > 0) {
+          const safeTournaments = data.tournaments.map((t: any) => ({
+            ...t,
+            registrations: Array.isArray(t.registrations) ? t.registrations : [],
+            rules: Array.isArray(t.rules) ? t.rules : [],
+            schedule: Array.isArray(t.schedule) ? t.schedule : [],
+            brackets: Array.isArray(t.brackets) ? t.brackets : [],
+          }));
+          setTournaments(safeTournaments);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/gamers")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.gamers) && data.gamers.length > 0) {
+          const safeGamers = data.gamers.map((g: any) => ({
+            ...g,
+            connectedGames: Array.isArray(g.connectedGames) ? g.connectedGames : [],
+            matchHistory: Array.isArray(g.matchHistory) ? g.matchHistory : [],
+            achievements: Array.isArray(g.achievements) ? g.achievements : [],
+            stats: {
+              tournamentsPlayed: g.stats?.tournamentsPlayed || 10,
+              tournamentsWon: g.stats?.tournamentsWon || 3,
+              matchesPlayed: g.stats?.matchesPlayed || 0,
+              matchesWon: g.stats?.matchesWon || 0,
+              winRate: g.stats?.winRate || 0,
+              earningsETB: g.stats?.earningsETB || 0,
+              rankTier: g.stats?.rankTier || g.rankTier || "Diamond",
+              ratingPoints: g.stats?.ratingPoints || g.ratingPoints || 1200,
+            },
+            location: {
+              regionId: g.location?.regionId || g.regionId || "reg-aa",
+              regionName: g.location?.regionName || g.regionName || "Addis Ababa",
+              zoneId: g.location?.zoneId || g.zoneId || "zone-aa-central",
+              zoneName: g.location?.zoneName || g.zoneName || "Central Addis",
+              woredaId: g.location?.woredaId || g.woredaId || "wor-bole",
+              woredaName: g.location?.woredaName || g.woredaName || "Bole Sub-City",
+              communityName: g.location?.communityName || g.communityName || "",
+            },
+          }));
+          setGamers(safeGamers);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const saveTournamentsState = (updated: Tournament[]) => {
@@ -623,7 +674,18 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return newSession;
   };
 
-  const currentUser = gamers.find((g) => g.id === currentSession.gamerId) || null;
+  const currentUser =
+    gamers.find(
+      (g) =>
+        g.id === currentSession.gamerId ||
+        (currentSession.gamerId === "gamer-1" && (g.id === "gamer-viper" || g.gamerTag === "ViperX")) ||
+        (currentSession.gamerId === "gamer-viper" && (g.id === "gamer-1" || g.gamerTag === "ViperX")) ||
+        (currentSession.tag && g.gamerTag?.toLowerCase() === currentSession.tag?.toLowerCase()) ||
+        (currentSession.email && g.email && g.email.toLowerCase() === currentSession.email.toLowerCase())
+    ) ||
+    gamers.find((g) => g.gamerTag?.toLowerCase() === "viperx") ||
+    gamers[0] ||
+    null;
 
   const markAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
@@ -684,6 +746,13 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     saveTournamentsState(updatedTournaments);
+
+    // Asynchronously sync registration to SQLite database
+    fetch(`/api/tournaments/${tournamentId}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newRegistration),
+    }).catch(() => {});
 
     setNotifications((prev) => [
       {
@@ -752,6 +821,14 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
     const updated = [created, ...tournaments];
     saveTournamentsState(updated);
+
+    // Asynchronously sync new tournament to SQLite database
+    fetch("/api/tournaments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(created),
+    }).catch(() => {});
+
     return id;
   };
 
@@ -800,6 +877,13 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return g;
     });
     saveGamersState(updatedGamers);
+
+    // Asynchronously sync updated gamer profile to SQLite database
+    fetch("/api/gamers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: gamerId, ...updates }),
+    }).catch(() => {});
 
     // Also sync active session if current user edited their handle or avatar
     if (currentSession.gamerId === gamerId) {

@@ -78,7 +78,7 @@ export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-[28px] sm:text-[34px] font-[800] text-[#F4F1FF] tracking-tight leading-none">
-                {currentUser.realName || "Amanuel Alemu"}
+                {currentUser.realName || "Yared Tadesse"}
               </h1>
               <ShieldCheck className="w-5 h-5 text-[#A855F7]" />
             </div>
@@ -91,7 +91,7 @@ export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
                 className="inline-flex items-center gap-1 font-mono text-[#F4F1FF] hover:text-[#A855F7] transition"
                 title="Click to copy ID"
               >
-                <span>{currentUser.ethoraId || "#ETH-7729"}</span>
+                <span>{currentUser.ethoraId || "ET-VIPER01"}</span>
                 {copiedId ? (
                   <Check className="w-3 h-3 text-[#22C55E]" />
                 ) : (
@@ -139,7 +139,7 @@ export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
                 Total Matches
               </span>
               <span className="text-[26px] sm:text-[30px] font-[700] text-[#F4F1FF] tabular-nums block leading-none">
-                {currentUser.stats?.matchesPlayed || 342}
+                {currentUser.stats?.matchesPlayed ?? 198}
               </span>
             </div>
 
@@ -150,7 +150,7 @@ export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
               </span>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-[26px] sm:text-[30px] font-[700] text-[#F4F1FF] tabular-nums leading-none">
-                  {currentUser.stats?.winRate || 77}%
+                  {currentUser.stats?.winRate ?? 71.7}%
                 </span>
                 <span className="text-[12px] font-[600] text-[#22C55E] tabular-nums inline-flex items-center">
                   ↑ +2%
@@ -168,7 +168,7 @@ export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
                   ETB
                 </div>
                 <span className="text-[22px] sm:text-[26px] font-[700] text-[#F5B82E] tabular-nums leading-none">
-                  ETB {currentUser.stats?.earningsETB ? currentUser.stats.earningsETB.toLocaleString() : "385,000"}
+                  ETB {currentUser.stats?.earningsETB ? currentUser.stats.earningsETB.toLocaleString() : "177,500"}
                 </span>
               </div>
             </div>
@@ -186,7 +186,7 @@ export const GamerDashboardHeader: React.FC<GamerDashboardHeaderProps> = ({
                 National Rank
               </span>
               <span className="text-[40px] font-[800] text-[#F5B82E] tabular-nums leading-none my-1 drop-shadow-[0_2px_10px_rgba(245,184,46,0.5)]">
-                #{currentUser.nationalRank || 1}
+                #{currentUser.nationalRank || 4}
               </span>
               <div className="flex items-center gap-1.5 text-[12px] font-[500] text-[#F4F1FF] mt-0.5">
                 <span className="text-sm">🇪🇹</span>

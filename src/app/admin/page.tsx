@@ -100,27 +100,27 @@ export default function AdminConsolePage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 rounded-xl border border-[#232A42] bg-[#0E111A] space-y-1">
           <span className="text-[10px] font-bold uppercase text-slate-400 block">Total Athletes</span>
-          <p className="text-2xl font-black text-white font-mono">{gamers.length * 1000 + 420}</p>
+          <p className="text-2xl font-black text-white font-mono">{(gamers?.length || 0) * 1000 + 420}</p>
           <span className="text-[10px] text-emerald-400">99.8% System Uptime</span>
         </div>
 
         <div className="p-4 rounded-xl border border-[#232A42] bg-[#0E111A] space-y-1">
           <span className="text-[10px] font-bold uppercase text-slate-400 block">Sanctioned Cups</span>
-          <p className="text-2xl font-black text-violet-400 font-mono">{tournaments.length}</p>
+          <p className="text-2xl font-black text-violet-400 font-mono">{tournaments?.length || 0}</p>
           <span className="text-[10px] text-violet-300">All Regions Active</span>
         </div>
 
         <div className="p-4 rounded-xl border border-[#232A42] bg-[#0E111A] space-y-1">
           <span className="text-[10px] font-bold uppercase text-slate-400 block">Pending Verifications</span>
           <p className="text-2xl font-black text-amber-400 font-mono">
-            {verificationQueue.filter((v) => v.status === "pending").length}
+            {(verificationQueue || []).filter((v) => v.status === "pending").length}
           </p>
           <span className="text-[10px] text-amber-300">Manual review queue</span>
         </div>
 
         <div className="p-4 rounded-xl border border-[#232A42] bg-[#0E111A] space-y-1">
           <span className="text-[10px] font-bold uppercase text-slate-400 block">Active Titles</span>
-          <p className="text-2xl font-black text-cyan-400 font-mono">{SUPPORTED_GAMES.length}</p>
+          <p className="text-2xl font-black text-cyan-400 font-mono">{SUPPORTED_GAMES?.length || 0}</p>
           <span className="text-[10px] text-slate-400">FPS, Sports, MOBA</span>
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function AdminConsolePage() {
       <div className="flex items-center gap-2 border-b border-[#232A42] pb-1">
         {[
           { id: "overview", label: "System Health & Games" },
-          { id: "verifications", label: `Athlete Verifications (${verificationQueue.filter(v => v.status === "pending").length})` },
+          { id: "verifications", label: `Athlete Verifications (${(verificationQueue || []).filter(v => v.status === "pending").length})` },
           { id: "audit", label: "Security & Audit Logs" },
         ].map((t) => (
           <button

@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./ethora.db"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  passwordHash String
+  tag          String
+  name         String
+  role         String        @default("gamer") // gamer, organizer, admin, organization
+  avatar       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  profile      GamerProfile?
+}
+
+model GamerProfile {
+  id             String                   @id
+  userId         String?                  @unique
+  user           User?                    @relation(fields: [userId], references: [id])
+  gamerTag       String                   @unique
+  realName       String
+  ethoraId       String                   @unique
+  avatar         String
+  banner         String?
+  bio            String?
+  rankTier       String                   @default("Diamond")
+  ratingPoints   Int                      @default(1200)
+  regionId       String                   @default("reg-aa")
+  regionName     String                   @default("Addis Ababa")
+  zoneId         String                   @default("zone-aa-central")
+  zoneName       String                   @default("Central Addis")
+  woredaId       String                   @default("wor-bole")
+  woredaName     String                   @default("Bole Sub-City")
+  communityName  String?
+  matchesPlayed  Int                      @default(0)
+  matchesWon     Int                      @default(0)
+  winRate        Float                    @default(0)
+  verified       Boolean                  @default(true)
+  connectedGames String                   @default("[]") // JSON string of ConnectedGame[]
+  matchHistory   String                   @default("[]") // JSON string of MatchRecord[]
+  achievements   String                   @default("[]") // JSON string of Achievement[]
+  registrations  TournamentRegistration[]
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+}
+
+model Tournament {
+  id                   String                   @id
+  slug                 String                   @unique
+  title                String
+  description          String
+  gameId               String
+  gameName             String
+  bannerUrl            String
+  organizerTag         String                   @default("LCE")
+  organizerName        String                   @default("Lion City Esports")
+  organizerLogo        String?
+  organizerVerified    Boolean                  @default(true)
+  prizePoolETB         Int                      @default(0)
+  prizePoolUSD         Int                      @default(0)
+  format               String                   @default("Double Elimination")
+  status               String                   @default("registration_open")
+  registrationDeadline String
+  startsAt             String
+  endsAt               String
+  venueType            String                   @default("LAN / Arena")
+  regionName           String                   @default("Addis Ababa")
+  venueName            String                   @default("Millennium Hall Arena")
+  address              String                   @default("Bole Medhanialem, Addis Ababa")
+  entryFeeETB          Int                      @default(0)
+  maxParticipants      Int                      @default(16)
+  registeredCount      Int                      @default(0)
+  rules                String                   @default("[]") // JSON string of string[]
+  schedule             String                   @default("[]") // JSON string of schedule objects
+  brackets             String                   @default("[]") // JSON string of BracketMatch[]
+  registrations        TournamentRegistration[]
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+}
+
+model TournamentRegistration {
+  id             String       @id
+  tournamentId   String
+  tournament     Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  gamerId        String
+  gamer          GamerProfile @relation(fields: [gamerId], references: [id], onDelete: Cascade)
+  gamerTag       String
+  realName       String
+  avatar         String
+  ethoraId       String
+  inGameName     String
+  rankTier       String       @default("Diamond")
+  location       String
+  registeredAt   String
+  status         String       @default("pending") // approved, pending, rejected
+  checkInStatus  Boolean      @default(false)
+  paymentStatus  String       @default("free") // free, paid, pending
+  paymentMethod  String?
+  transactionRef String?
+  amountETB      Int          @default(0)
+  paidAt         String?
+  createdAt      DateTime     @default(now())
+}
+
+model Team {
+  id          String   @id
+  name        String
+  tag         String   @unique
+  logo        String
+  banner      String?
+  captainId   String
+  captainTag  String
+  regionId    String
+  regionName  String
+  members     String   @default("[]") // JSON string of TeamMember[]
+  stats       String   @default("{}") // JSON string of TeamStats
+  verified    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id
+  userId    String
+  title     String
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  timestamp DateTime @default(now())
+}

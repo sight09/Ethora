@@ -137,7 +137,7 @@ export default function ProfilePage() {
               </h2>
 
               <div className="space-y-4">
-                {profile.connectedGames.map((gameAcc) => (
+                {(profile.connectedGames || []).map((gameAcc) => (
                   <div
                     key={gameAcc.gameId}
                     className="p-5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#141826] space-y-4"
@@ -184,7 +184,7 @@ export default function ProfilePage() {
               </h2>
 
               <div className="space-y-2.5">
-                {profile.matchHistory.map((m) => (
+                {(profile.matchHistory || []).map((m) => (
                   <div
                     key={m.id}
                     className="p-4 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#141826] flex items-center justify-between text-xs"
@@ -290,13 +290,13 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-amber-400" />
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
-                    HONORS & BADGES ({profile.achievements.length})
+                    HONORS & BADGES ({(profile.achievements || []).length})
                   </h3>
                 </div>
               </div>
 
               <div className="space-y-3">
-                {profile.achievements.map((ach) => (
+                {(profile.achievements || []).map((ach) => (
                   <div
                     key={ach.id}
                     className="p-3.5 rounded-xl border border-[rgba(168,85,247,0.25)] bg-[#141826] flex items-center gap-3.5"

@@ -130,7 +130,8 @@ All avatars and presentation banners are designed to be completely offline-resil
 | **Styling** | [Tailwind CSS 3.4](https://tailwindcss.com/) | Cyberpunk dark theme palette (`#05030D`, `#0E101B`, `#A855F7`) |
 | **Icons** | [Lucide React](https://lucide.dev/) | Clean vector iconography |
 | **Image Processing** | HTML5 Canvas API | In-browser client-side image compression (<50KB WebP) |
-| **State & Storage** | React Context + LocalStorage | State synchronization, role switches, and deterministic SHA-256 auth |
+| **Database & ORM** | [SQLite](https://www.sqlite.org/) + [Prisma ORM](https://www.prisma.io/) | Self-contained relational database (`prisma/ethora.db`) with full type safety |
+| **State & Hydration** | React Context + SQLite REST APIs | Real-time multi-device database sync across PC and mobile over LAN |
 
 ---
 
@@ -196,6 +197,19 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 npm run build
 npm run start
 ```
+
+### 5. Managing the SQLite Database
+- **Open Visual Database Studio**:
+  ```bash
+  npx prisma studio
+  ```
+  Opens an interactive GUI in your browser at `http://localhost:5555` to view, query, and edit all athletes, tournaments, registrations, and teams!
+- **Reset or Re-Seed Database**:
+  ```bash
+  node prisma/seed.js
+  ```
+- **Direct Database File**:
+  Stored locally at `prisma/ethora.db` (can be opened with [DB Browser for SQLite](https://sqlitebrowser.org/)).
 
 ---
 

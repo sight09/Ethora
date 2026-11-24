@@ -105,10 +105,10 @@ export default function TeamsPage() {
             {/* Roster Members */}
             <div className="space-y-2 pt-2 border-t border-[#232A42]">
               <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider block font-mono">
-                Active Starting Roster ({team.members.length} Athletes)
+                Active Starting Roster ({(team.members || []).length} Athletes)
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {team.members.map((member) => (
+                {(team.members || []).map((member) => (
                   <div
                     key={member.id}
                     className="p-2 rounded-lg bg-[#141826] border border-[#232A42] flex items-center gap-2"

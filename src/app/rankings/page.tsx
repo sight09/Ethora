@@ -33,26 +33,27 @@ export default function RankingsPage() {
   // Filter gamers
   const filteredGamers = gamers
     .filter((gamer) => {
+      if (!gamer) return false;
       // Search
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchesTag = gamer.gamerTag.toLowerCase().includes(q);
-        const matchesReal = gamer.realName.toLowerCase().includes(q);
-        const matchesId = gamer.ethoraId.toLowerCase().includes(q);
+        const matchesTag = (gamer.gamerTag || "").toLowerCase().includes(q);
+        const matchesReal = (gamer.realName || "").toLowerCase().includes(q);
+        const matchesId = (gamer.ethoraId || "").toLowerCase().includes(q);
         const matchesLoc =
-          gamer.location.regionName.toLowerCase().includes(q) ||
-          gamer.location.communityName.toLowerCase().includes(q);
+          (gamer.location?.regionName || "").toLowerCase().includes(q) ||
+          (gamer.location?.communityName || "").toLowerCase().includes(q);
         if (!matchesTag && !matchesReal && !matchesId && !matchesLoc) return false;
       }
 
       // Region filter
-      if (selectedRegionId !== "all" && gamer.location.regionId !== selectedRegionId) {
+      if (selectedRegionId !== "all" && gamer.location?.regionId !== selectedRegionId) {
         return false;
       }
 
       // Game filter
       if (selectedGameId !== "all") {
-        const playsGame = gamer.connectedGames.some((cg) => cg.gameId === selectedGameId);
+        const playsGame = (gamer.connectedGames || []).some((cg) => cg.gameId === selectedGameId);
         if (!playsGame) return false;
       }
 
@@ -60,9 +61,9 @@ export default function RankingsPage() {
     })
     .sort((a, b) => {
       if (sortBy === "winRate") {
-        return b.stats.winRate - a.stats.winRate;
+        return (b.stats?.winRate || 0) - (a.stats?.winRate || 0);
       }
-      return b.ratingPoints - a.ratingPoints;
+      return (b.ratingPoints || 0) - (a.ratingPoints || 0);
     });
 
   // Top 3 Podium
@@ -277,8 +278,8 @@ export default function RankingsPage() {
             <tbody className="divide-y divide-[rgba(168,85,247,0.15)] text-[#B8B3CC]">
               {filteredGamers.map((gamer, idx) => {
                 const rankNum = idx + 1;
-                const rankTier = getRankTier(gamer.ratingPoints);
-                const primaryGame = gamer.connectedGames[0];
+                const rankTier = getRankTier(gamer.ratingPoints || 1200);
+                const primaryGame = (gamer.connectedGames || [])[0];
 
                 return (
                   <tr
@@ -352,26 +353,26 @@ export default function RankingsPage() {
                       <div className="flex items-center gap-1 text-[13px] font-[400] text-[#B8B3CC]">
                         <MapPin className="w-3 h-3 text-[#A855F7] shrink-0" />
                         <span className="truncate max-w-[160px]">
-                          {gamer.location.communityName || gamer.location.woredaName}
+                          {gamer.location?.communityName || gamer.location?.woredaName || gamer.location?.regionName || "Ethiopia"}
                         </span>
                       </div>
                       <span className="text-[13px] font-[400] text-[#7D7896] block">
-                        {gamer.location.regionName}
+                        {gamer.location?.regionName || "National"}
                       </span>
                     </td>
 
                     {/* Win Rate */}
                     <td className="py-4 px-4 text-center font-sans">
-                      <span className="font-[600] text-[#22C55E] text-[15px] tabular-nums">{gamer.stats.winRate}%</span>
+                      <span className="font-[600] text-[#22C55E] text-[15px] tabular-nums">{gamer.stats?.winRate || 0}%</span>
                       <span className="text-[12px] font-[400] text-[#7D7896] block tabular-nums">
-                        {gamer.stats.matchesWon}W - {gamer.stats.matchesPlayed - gamer.stats.matchesWon}L
+                        {gamer.stats?.matchesWon || 0}W - {Math.max(0, (gamer.stats?.matchesPlayed || 0) - (gamer.stats?.matchesWon || 0))}L
                       </span>
                     </td>
 
                     {/* Rating Points */}
                     <td className="py-4 px-4 text-right font-sans">
                       <span className="text-[18px] font-[700] text-[#A855F7] tabular-nums block">
-                        {gamer.ratingPoints}
+                        {gamer.ratingPoints || 0}
                       </span>
                       <span className="text-[12px] font-[500] text-[#7D7896] capitalize">
                         {rankTier.tier}

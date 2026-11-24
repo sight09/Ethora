@@ -38,18 +38,18 @@ export default function OrganizerDashboardPage() {
     tournaments.find((t) => t.id === selectedTournamentId) || tournaments[0];
 
   const totalRegisteredAthletes = tournaments.reduce(
-    (acc, t) => acc + t.registrations.length,
+    (acc, t) => acc + (t.registrations?.length || 0),
     0
   );
 
-  const pendingApplications = currentTournament?.registrations.filter(
+  const pendingApplications = (currentTournament?.registrations || []).filter(
     (r) => r.status === "pending"
   ).length || 0;
 
-  const filteredRegistrations = currentTournament?.registrations.filter((r) => {
+  const filteredRegistrations = (currentTournament?.registrations || []).filter((r) => {
     if (filterStatus !== "all" && r.status !== filterStatus) return false;
     return true;
-  }) || [];
+  });
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
