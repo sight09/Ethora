@@ -1415,6 +1415,27 @@ const SEED_NOTIFICATIONS = [
   },
 ];
 
+const SEED_VERIFICATIONS = [
+  {
+    id: "v-1",
+    gamerTag: "KiroSmoke",
+    realName: "Kirubel Sisay",
+    gameTitle: "Valorant",
+    submittedProof: "Radiant 382 RR Screenshot + VCT East Africa ID",
+    submittedDate: "2026-11-12",
+    status: "pending",
+  },
+  {
+    id: "v-2",
+    gamerTag: "AbebeClutch",
+    realName: "Abebe Kassaye",
+    gameTitle: "Counter-Strike 2",
+    submittedProof: "Premier 22,400 Rating Steam Profile Link",
+    submittedDate: "2026-11-11",
+    status: "pending",
+  },
+];
+
 async function seed() {
   console.log("Seeding SQLite database: prisma/ethora.db...");
 
@@ -1425,6 +1446,7 @@ async function seed() {
   await prisma.user.deleteMany();
   await prisma.team.deleteMany();
   await prisma.notification.deleteMany();
+  await prisma.verificationRequest.deleteMany();
 
   // 1. Seed Users
   for (const u of DEMO_USERS) {
@@ -1461,6 +1483,12 @@ async function seed() {
     await prisma.notification.create({ data: n });
   }
   console.log(`✓ Seeded ${SEED_NOTIFICATIONS.length} System Notifications`);
+
+  // 7. Seed Verification Requests
+  for (const v of SEED_VERIFICATIONS) {
+    await prisma.verificationRequest.create({ data: v });
+  }
+  console.log(`✓ Seeded ${SEED_VERIFICATIONS.length} Athlete Verification Requests`);
 
   console.log("★ SQLite Database Seeding Completed Successfully! Target: prisma/ethora.db");
 }

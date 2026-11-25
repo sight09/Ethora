@@ -115,14 +115,30 @@ model Team {
   tag         String   @unique
   logo        String
   banner      String?
+  gameId      String?  @default("game-valorant")
+  gameName    String?  @default("Valorant")
   captainId   String
   captainTag  String
-  regionId    String
-  regionName  String
+  regionId    String   @default("reg-aa")
+  regionName  String   @default("Addis Ababa")
   members     String   @default("[]") // JSON string of TeamMember[]
   stats       String   @default("{}") // JSON string of TeamStats
   verified    Boolean  @default(true)
   createdAt   DateTime @default(now())
+}
+
+model VerificationRequest {
+  id             String    @id
+  gamerTag       String
+  realName       String
+  gameTitle      String
+  submittedProof String
+  submittedDate  String
+  status         String    @default("pending") // pending, approved, rejected
+  reviewedAt     DateTime?
+  reviewedBy     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Notification {

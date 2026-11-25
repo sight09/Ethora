@@ -283,7 +283,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.tournaments) && data.tournaments.length > 0) {
-          const safeTournaments = data.tournaments.map((t: any) => ({
+          const safeTournaments = data.tournaments.map((t: Tournament) => ({
             ...t,
             registrations: Array.isArray(t.registrations) ? t.registrations : [],
             rules: Array.isArray(t.rules) ? t.rules : [],
@@ -299,7 +299,18 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.gamers) && data.gamers.length > 0) {
-          const safeGamers = data.gamers.map((g: any) => ({
+          interface RawGamerApiItem extends Partial<GamerProfile> {
+            rankTier?: string;
+            ratingPoints?: number;
+            regionId?: string;
+            regionName?: string;
+            zoneId?: string;
+            zoneName?: string;
+            woredaId?: string;
+            woredaName?: string;
+            communityName?: string;
+          }
+          const safeGamers = data.gamers.map((g: RawGamerApiItem) => ({
             ...g,
             connectedGames: Array.isArray(g.connectedGames) ? g.connectedGames : [],
             matchHistory: Array.isArray(g.matchHistory) ? g.matchHistory : [],
@@ -311,9 +322,9 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
               matchesWon: g.stats?.matchesWon || 0,
               winRate: g.stats?.winRate || 0,
               earningsETB: g.stats?.earningsETB || 0,
-              rankTier: g.stats?.rankTier || g.rankTier || "Diamond",
-              ratingPoints: g.stats?.ratingPoints || g.ratingPoints || 1200,
             },
+            rankTier: g.rankTier || "Diamond",
+            ratingPoints: g.ratingPoints || 1200,
             location: {
               regionId: g.location?.regionId || g.regionId || "reg-aa",
               regionName: g.location?.regionName || g.regionName || "Addis Ababa",
@@ -325,6 +336,16 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             },
           }));
           setGamers(safeGamers);
+        }
+      })
+      .catch(() => {});
+
+    // Hydrate & Sync Teams from local SQLite Database
+    fetch("/api/teams")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.teams) && data.teams.length > 0) {
+          setTeams(data.teams);
         }
       })
       .catch(() => {});
@@ -359,10 +380,10 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       const existingUsersRaw = localStorage.getItem("ethora_registered_users");
       if (existingUsersRaw) {
-        const existingUsers = JSON.parse(existingUsersRaw);
+        const existingUsers: Array<{ email: string; password?: string; session: UserSession }> = JSON.parse(existingUsersRaw);
         const hashedAttempt = password ? quickHash(password) : "";
         const match = existingUsers.find(
-          (u: any) =>
+          (u) =>
             u.email === cleanEmail &&
             (!password || u.password === hashedAttempt || u.password === password)
         );
@@ -376,7 +397,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch { }
 
     // 1. Check presets
-    for (const [key, s] of Object.entries(PRESET_SESSIONS)) {
+    for (const s of Object.values(PRESET_SESSIONS)) {
       if (
         s.email.toLowerCase() === cleanEmail ||
         s.tag.toLowerCase() === cleanEmail ||
@@ -839,6 +860,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     score2: number,
     winnerParticipantId: string
   ) => {
+    let finalBrackets: BracketMatch[] = [];
     const updatedTournaments = tournaments.map((t) => {
       if (t.id === tournamentId && t.brackets) {
         const updatedBrackets = t.brackets.map((match) => {
@@ -862,28 +884,47 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           }
           return match;
         });
+        finalBrackets = updatedBrackets;
         return { ...t, brackets: updatedBrackets };
       }
       return t;
     });
     saveTournamentsState(updatedTournaments);
+
+    // Asynchronously sync updated bracket matches to SQLite database
+    fetch(`/api/tournaments/${tournamentId}/brackets`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        brackets: finalBrackets,
+        matchId,
+        score1,
+        score2,
+        winnerParticipantId,
+      }),
+    }).catch((err) => console.error("Failed to persist bracket score to DB:", err));
   };
 
   const updateGamerProfile = (gamerId: string, updates: Partial<GamerProfile>) => {
+    let fullUpdatedGamer: GamerProfile | null = null;
     const updatedGamers = gamers.map((g) => {
       if (g.id === gamerId) {
-        return { ...g, ...updates };
+        const merged = { ...g, ...updates };
+        fullUpdatedGamer = merged;
+        return merged;
       }
       return g;
     });
     saveGamersState(updatedGamers);
 
     // Asynchronously sync updated gamer profile to SQLite database
-    fetch("/api/gamers", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: gamerId, ...updates }),
-    }).catch(() => {});
+    if (fullUpdatedGamer) {
+      fetch("/api/gamers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fullUpdatedGamer),
+      }).catch((err) => console.error("Failed to sync gamer profile to DB:", err));
+    }
 
     // Also sync active session if current user edited their handle or avatar
     if (currentSession.gamerId === gamerId) {
@@ -908,6 +949,7 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     platform: "PC" | "Mobile" | "Console",
     platformId: string
   ) => {
+    let targetGamerWithAccount: GamerProfile | null = null;
     const updatedGamers = gamers.map((g) => {
       if (g.id === gamerId) {
         const newAccount = {
@@ -923,14 +965,25 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           stats: { winRate: "62%", matches: "45" },
         };
         const existing = g.connectedGames.filter((cg) => cg.gameId !== gameId);
-        return {
+        const updated = {
           ...g,
           connectedGames: [...existing, newAccount],
         };
+        targetGamerWithAccount = updated;
+        return updated;
       }
       return g;
     });
     saveGamersState(updatedGamers);
+
+    // Asynchronously persist new connected game account to SQLite database
+    if (targetGamerWithAccount) {
+      fetch("/api/gamers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(targetGamerWithAccount),
+      }).catch((err) => console.error("Failed to sync connected game account to DB:", err));
+    }
   };
 
   const createTeam = (name: string, tag: string, gameId: string, gameName: string): string => {
@@ -965,7 +1018,16 @@ export const EthoraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         winRate: 0,
       },
     };
-    setTeams([newTeam, ...teams]);
+    const updatedTeams = [newTeam, ...teams];
+    setTeams(updatedTeams);
+
+    // Asynchronously persist new team to SQLite database
+    fetch("/api/teams", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newTeam),
+    }).catch((err) => console.error("Failed to persist team to DB:", err));
+
     return id;
   };
 

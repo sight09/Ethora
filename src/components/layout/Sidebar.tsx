@@ -8,29 +8,23 @@ import {
   Users,
   Swords,
   Layers,
-  Sparkles,
   Bell,
   Menu,
-  X,
   ChevronDown,
   ShieldAlert,
-  CheckCircle2,
-  Calendar,
   Settings,
-  Flame,
   LayoutDashboard,
   PlusCircle,
   ShieldCheck,
-  PanelLeftClose,
-  PanelLeftOpen,
   ChevronRight,
   ChevronLeft,
-  LogIn,
   LogOut,
   User,
+  AlertTriangle,
+  LucideIcon,
 } from "lucide-react";
 import EthoraLogo, { EthoraEmblem } from "@/components/brand/EthoraLogo";
-import { useEthora, RoleType } from "@/context/EthoraContext";
+import { useEthora } from "@/context/EthoraContext";
 
 interface SidebarProps {
   isCollapsed?: boolean;
@@ -47,9 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const router = useRouter();
   const {
     currentSession,
-    setRole,
     logout,
-    currentUser,
     notifications,
     unreadNotificationCount,
     markAllNotificationsRead,
@@ -57,23 +49,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
   const isOrganizer = currentSession.role === "organizer" || currentSession.role === "organization" || currentSession.tag === "RiftAdmin";
   const isAdmin = currentSession.role === "admin";
-  const isGuest = currentSession.role === "guest";
-
-  const rolesList: { role: RoleType; title: string; subtitle: string; icon: any }[] = [
-    { role: "gamer", title: "Yared 'ViperX'", subtitle: "Rank #1 Pro Gamer", icon: Flame },
-    { role: "organizer", title: "Lion City Esports", subtitle: "Tournament Organizer", icon: Swords },
-    { role: "organization", title: "Great Rift Syndicate", subtitle: "Esports Org Director", icon: Layers },
-    { role: "admin", title: "ETHORA Ops Lead", subtitle: "Platform Administrator", icon: ShieldAlert },
-  ];
 
   interface NavItem {
     label: string;
     href: string;
-    icon: any;
+    icon: LucideIcon;
     badge?: string;
     highlight?: boolean;
   }
@@ -252,8 +237,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             onClick={() => setRoleMenuOpen(!roleMenuOpen)}
             className="relative p-0.5 rounded-xl border border-violet-500/40 hover:border-violet-400 hover:scale-105 active:scale-95 transition"
-            title={`Active Persona: ${currentSession.tag} (${currentSession.role})`}
-            aria-label="Profile and role switcher"
+            title={`Logged in as ${currentSession.tag}`}
+            aria-label="Profile and account menu"
           >
             <img
               src={currentSession.avatar}
@@ -265,68 +250,74 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Hover Tooltip */}
           <div className="absolute left-full ml-3 bottom-1 px-3 py-1.5 rounded-lg bg-[#0E111A] border border-[#232A42] text-white text-xs font-semibold whitespace-nowrap shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none z-50">
-            {currentSession.tag} ({currentSession.role})
+            {currentSession.tag}
           </div>
 
-          {/* Role switcher popup when clicked */}
+          {/* Clean Profile Popup */}
           {roleMenuOpen && (
-            <div className="fixed left-20 bottom-12 w-64 rounded-xl border border-[#232A42] bg-[#0E111A] shadow-2xl p-2 z-50 space-y-1">
-              <div className="px-2 py-1.5 border-b border-[#232A42] mb-1 flex items-center justify-between">
-                <p className="text-[10px] font-bold uppercase text-slate-400">Account & Persona</p>
-                <Link
-                  href="/auth/signin"
-                  onClick={() => setRoleMenuOpen(false)}
-                  className="text-[10px] text-violet-400 hover:text-violet-300 font-bold flex items-center gap-1"
-                >
-                  <LogIn className="w-3 h-3" />
-                  <span>Login Page</span>
-                </Link>
+            <div className="fixed left-20 bottom-12 w-64 rounded-2xl border border-[rgba(168,85,247,0.3)] bg-[#0E111A] shadow-2xl p-3 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+              {/* Profile Card Header */}
+              <div className="flex items-center gap-3 pb-2.5 border-b border-[#232A42]">
+                <img
+                  src={currentSession.avatar}
+                  alt={currentSession.tag}
+                  className="w-10 h-10 rounded-xl object-cover border border-violet-500/40"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-white truncate">{currentSession.tag}</p>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 truncate">{currentSession.name}</p>
+                  <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-violet-950/80 text-violet-300 border border-violet-700/50 mt-0.5">
+                    {currentSession.role === "gamer" ? "Verified Competitor" : currentSession.role}
+                  </span>
+                </div>
               </div>
-              {rolesList.map((item) => {
-                const RoleIcon = item.icon;
-                const isSelected = currentSession.role === item.role;
-                return (
-                  <button
-                    key={item.role}
-                    onClick={() => {
-                      setRole(item.role);
-                      setRoleMenuOpen(false);
-                    }}
-                    className={`w-full text-left p-2 rounded-lg flex items-center gap-2.5 transition ${isSelected
-                      ? "bg-violet-600 text-white font-bold"
-                      : "hover:bg-[#141826] text-slate-300"
-                      }`}
-                  >
-                    <RoleIcon className="w-3.5 h-3.5 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <span className="text-xs truncate block">{item.title}</span>
-                      <span className="text-[10px] opacity-70 truncate block">{item.subtitle}</span>
-                    </div>
-                  </button>
-                );
-              })}
-              <div className="pt-1 mt-1 border-t border-[#232A42] flex items-center justify-between px-1">
+
+              {/* Navigation Actions */}
+              <div className="space-y-1">
                 <Link
-                  href="/auth/signin"
+                  href="/profile"
                   onClick={() => setRoleMenuOpen(false)}
-                  className="p-1.5 text-[11px] text-slate-400 hover:text-white flex items-center gap-1.5 rounded-lg hover:bg-[#141826] transition"
+                  className="w-full p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#141826] flex items-center gap-2.5 transition"
                 >
-                  <LogIn className="w-3.5 h-3.5 text-violet-400" />
-                  <span>Sign In</span>
+                  <User className="w-4 h-4 text-violet-400" />
+                  <span>View Athlete Passport</span>
                 </Link>
-                {currentSession.role !== "guest" && (
-                  <button
-                    onClick={() => {
-                      logout();
-                      setRoleMenuOpen(false);
-                      router.push("/");
-                    }}
-                    className="p-1.5 text-[11px] text-red-400 hover:text-red-300 flex items-center gap-1.5 rounded-lg hover:bg-[#141826] transition"
+                <Link
+                  href="/profile/settings"
+                  onClick={() => setRoleMenuOpen(false)}
+                  className="w-full p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#141826] flex items-center gap-2.5 transition"
+                >
+                  <Settings className="w-4 h-4 text-violet-400" />
+                  <span>Account Settings</span>
+                </Link>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setRoleMenuOpen(false)}
+                    className="w-full p-2 rounded-xl text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-950/30 flex items-center gap-2.5 transition"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Sign Out</span>
-                  </button>
+                    <ShieldAlert className="w-4 h-4 text-rose-400" />
+                    <span>Admin Console</span>
+                  </Link>
                 )}
+              </div>
+
+              {/* Sign Out Action Button */}
+              <div className="pt-2 border-t border-[#232A42]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRoleMenuOpen(false);
+                    setShowSignOutModal(true);
+                  }}
+                  className="w-full p-2 rounded-xl text-xs text-rose-400 hover:text-white hover:bg-rose-600/20 border border-rose-500/20 hover:border-rose-500/40 flex items-center justify-center gap-2 font-semibold transition"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out</span>
+                </button>
               </div>
             </div>
           )}
@@ -514,77 +505,82 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* 3. PROFILE / ACTIVE PERSONA & FOOTER STATUS (MOVED TO BOTTOM) */}
+      {/* 3. PROFILE & ACCOUNT FOOTER (MOVED TO BOTTOM) */}
       <div className="p-3 border-t border-[#232A42] bg-[#0E111A]/95 space-y-2.5 relative shrink-0 font-sans">
-        {/* Role Switcher Menu (Opens upward above profile button) */}
+        {/* Clean Profile Popup Menu (Opens upward above profile button) */}
         {roleMenuOpen && (
-          <div className="absolute left-3 right-3 bottom-full mb-2 rounded-xl border border-[#232A42] bg-[#0E111A] shadow-2xl p-2 z-50 space-y-1">
-            <div className="px-2 py-1.5 border-b border-[#232A42] mb-1 flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
-                Account & Persona
-              </span>
-              <Link
-                href="/auth/signin"
-                onClick={() => {
-                  setRoleMenuOpen(false);
-                  setMobileOpen(false);
-                }}
-                className="text-[11px] text-violet-400 hover:text-violet-300 font-bold flex items-center gap-1"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Login Page</span>
-              </Link>
+          <div className="absolute left-3 right-3 bottom-full mb-2 rounded-2xl border border-[rgba(168,85,247,0.3)] bg-[#0E111A] shadow-2xl p-3 z-50 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+            {/* Profile Card Header */}
+            <div className="flex items-center gap-3 pb-2.5 border-b border-[#232A42]">
+              <img
+                src={currentSession.avatar}
+                alt={currentSession.tag}
+                className="w-10 h-10 rounded-xl object-cover border border-violet-500/40"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-bold text-white truncate">{currentSession.tag}</p>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                </div>
+                <p className="text-[11px] text-slate-400 truncate">{currentSession.name}</p>
+                <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-violet-950/80 text-violet-300 border border-violet-700/50 mt-0.5">
+                  {currentSession.role === "gamer" ? "Verified Competitor" : currentSession.role}
+                </span>
+              </div>
             </div>
-            {rolesList.map((item) => {
-              const RoleIcon = item.icon;
-              const isSelected = currentSession.role === item.role;
-              return (
-                <button
-                  key={item.role}
-                  onClick={() => {
-                    setRole(item.role);
-                    setRoleMenuOpen(false);
-                    setMobileOpen(false);
-                  }}
-                  className={`w-full text-left p-2 rounded-lg flex items-center gap-2.5 transition ${isSelected
-                    ? "bg-violet-600 text-white font-bold"
-                    : "hover:bg-[#141826] text-slate-300"
-                    }`}
-                >
-                  <RoleIcon className="w-3.5 h-3.5 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <span className="text-xs truncate block">{item.title}</span>
-                    <span className="text-[10px] opacity-70 truncate block">{item.subtitle}</span>
-                  </div>
-                </button>
-              );
-            })}
-            <div className="pt-1.5 mt-1 border-t border-[#232A42] flex items-center justify-between px-1">
+
+            {/* Navigation Actions */}
+            <div className="space-y-1">
               <Link
-                href="/auth/signin"
+                href="/profile"
                 onClick={() => {
                   setRoleMenuOpen(false);
                   setMobileOpen(false);
                 }}
-                className="p-1.5 text-xs text-slate-300 hover:text-white flex items-center gap-1.5 rounded-lg hover:bg-[#141826] transition font-medium"
+                className="w-full p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#141826] flex items-center gap-2.5 transition"
               >
-                <LogIn className="w-3.5 h-3.5 text-violet-400" />
-                <span>Go to Sign In</span>
+                <User className="w-4 h-4 text-violet-400" />
+                <span>View Athlete Passport</span>
               </Link>
-              {currentSession.role !== "guest" && (
-                <button
+              <Link
+                href="/profile/settings"
+                onClick={() => {
+                  setRoleMenuOpen(false);
+                  setMobileOpen(false);
+                }}
+                className="w-full p-2 rounded-xl text-xs text-slate-200 hover:text-white hover:bg-[#141826] flex items-center gap-2.5 transition"
+              >
+                <Settings className="w-4 h-4 text-violet-400" />
+                <span>Account Settings</span>
+              </Link>
+              {isAdmin && (
+                <Link
+                  href="/admin"
                   onClick={() => {
-                    logout();
                     setRoleMenuOpen(false);
                     setMobileOpen(false);
-                    router.push("/");
                   }}
-                  className="p-1.5 text-xs text-red-400 hover:text-red-300 flex items-center gap-1.5 rounded-lg hover:bg-[#141826] transition font-medium"
+                  className="w-full p-2 rounded-xl text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-950/30 flex items-center gap-2.5 transition"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Sign Out</span>
-                </button>
+                  <ShieldAlert className="w-4 h-4 text-rose-400" />
+                  <span>Admin Console</span>
+                </Link>
               )}
+            </div>
+
+            {/* Sign Out Button */}
+            <div className="pt-2 border-t border-[#232A42]">
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleMenuOpen(false);
+                  setShowSignOutModal(true);
+                }}
+                className="w-full p-2 rounded-xl text-xs text-rose-400 hover:text-white hover:bg-rose-600/20 border border-rose-500/20 hover:border-rose-500/40 flex items-center justify-center gap-2 font-semibold transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
             </div>
           </div>
         )}
@@ -679,11 +675,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>AI</span>
           </button>
 
-          <img
-            src={currentSession.avatar}
-            alt=""
-            className="w-8 h-8 rounded-lg object-cover border border-violet-500/40"
-          />
+          <button
+            onClick={() => {
+              setMobileOpen(true);
+              setRoleMenuOpen(true);
+            }}
+            className="p-0.5 rounded-lg border border-violet-500/40 hover:border-violet-400 active:scale-95 transition"
+            title="Open Account Menu"
+            aria-label="Open Account Menu"
+          >
+            <img
+              src={currentSession.avatar}
+              alt={currentSession.tag}
+              className="w-8 h-8 rounded-lg object-cover"
+            />
+          </button>
         </div>
       </header>
 
@@ -696,6 +702,71 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
           <div className="relative w-64 max-w-[85vw] h-full z-10 shadow-2xl">
             {renderExpandedContent()}
+          </div>
+        </div>
+      )}
+
+      {/* 4. PROFESSIONAL SIGN OUT CONFIRMATION MODAL */}
+      {showSignOutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-sm sm:max-w-md rounded-2xl border border-rose-500/30 bg-[#120F1D] p-5 sm:p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150">
+            {/* Warning Alert Icon & Message */}
+            <div className="flex items-start gap-3.5 sm:gap-4">
+              <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                  Sign Out Confirmation
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Are you sure you want to sign out of your ETHORA account? You will need to enter your credentials on the login page to access your athlete passport and tournament registrations.
+                </p>
+              </div>
+            </div>
+
+            {/* Active Account Identity Badge */}
+            <div className="p-3 rounded-xl border border-[#232A42] bg-[#0A0A12] flex items-center gap-3">
+              <img
+                src={currentSession.avatar}
+                alt={currentSession.tag}
+                className="w-10 h-10 rounded-lg object-cover border border-violet-500/40"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-white truncate">{currentSession.tag}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-950 text-violet-300 border border-violet-700 font-mono capitalize">
+                    {currentSession.role === "gamer" ? "Athlete" : currentSession.role}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 truncate">{currentSession.email}</p>
+              </div>
+            </div>
+
+            {/* Modal Confirm / Cancel Actions */}
+            <div className="flex items-center justify-end gap-2.5 sm:gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowSignOutModal(false)}
+                className="px-4 py-2.5 rounded-xl border border-[#232A42] bg-[#141826] text-slate-300 hover:text-white hover:bg-[#1C2237] text-xs font-semibold transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  setShowSignOutModal(false);
+                  setRoleMenuOpen(false);
+                  setMobileOpen(false);
+                  router.push("/auth/signin");
+                }}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs font-bold shadow-lg shadow-rose-900/40 flex items-center gap-2 transition active:scale-95"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Yes, Sign Out</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

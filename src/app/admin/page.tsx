@@ -1,30 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   ShieldAlert,
-  Users,
-  Swords,
   CheckCircle2,
   XCircle,
-  FileText,
-  Activity,
-  Layers,
-  Award,
-  Search,
-  AlertCircle,
-  Lock,
 } from "lucide-react";
 import { useEthora } from "@/context/EthoraContext";
 import { SUPPORTED_GAMES } from "@/data/games";
 
+interface VerificationItem {
+  id: string;
+  gamerTag: string;
+  realName: string;
+  gameTitle: string;
+  submittedProof: string;
+  submittedDate: string;
+  status: string;
+}
+
 export default function AdminConsolePage() {
-  const { currentSession, gamers, tournaments } = useEthora();
+  const { gamers, tournaments } = useEthora();
 
   const [activeTab, setActiveTab] = useState<"overview" | "verifications" | "audit">("overview");
 
-  const [verificationQueue, setVerificationQueue] = useState([
+  const [verificationQueue, setVerificationQueue] = useState<VerificationItem[]>([
     {
       id: "v-1",
       gamerTag: "KiroSmoke",
@@ -45,16 +46,42 @@ export default function AdminConsolePage() {
     },
   ]);
 
+  // Fetch real verification queue from SQLite
+  useEffect(() => {
+    fetch("/api/admin/verifications")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.queue) && data.queue.length > 0) {
+          setVerificationQueue(data.queue);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const handleApproveVerification = (id: string) => {
+    // Optimistic UI update
     setVerificationQueue((prev) =>
       prev.map((v) => (v.id === id ? { ...v, status: "approved" } : v))
     );
+    // Persist to SQLite
+    fetch("/api/admin/verifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: "approved" }),
+    }).catch((err) => console.error("Failed to approve verification in DB:", err));
   };
 
   const handleRejectVerification = (id: string) => {
+    // Optimistic UI update
     setVerificationQueue((prev) =>
       prev.map((v) => (v.id === id ? { ...v, status: "rejected" } : v))
     );
+    // Persist to SQLite
+    fetch("/api/admin/verifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: "rejected" }),
+    }).catch((err) => console.error("Failed to reject verification in DB:", err));
   };
 
   return (
@@ -63,10 +90,12 @@ export default function AdminConsolePage() {
       <div className="relative rounded-2xl border border-rose-900/40 bg-[#14111F] p-6 lg:p-8 overflow-hidden shadow-2xl">
         {/* Background Stadium Arena Banner */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <img
+          <Image
             src="/images/ethora-stadium-banner.jpg"
             alt="Esports Arena"
-            className="w-full h-full object-cover object-center opacity-30 filter contrast-125 scale-105"
+            fill
+            className="object-cover object-center opacity-30 filter contrast-125 scale-105"
+            priority
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#14111F] via-[#14111F]/80 to-[#14111F]/60 z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#14111F] via-transparent to-[#14111F]/50 z-10" />
@@ -127,14 +156,16 @@ export default function AdminConsolePage() {
 
       {/* 3. TABS */}
       <div className="flex items-center gap-2 border-b border-[#232A42] pb-1">
-        {[
-          { id: "overview", label: "System Health & Games" },
-          { id: "verifications", label: `Athlete Verifications (${(verificationQueue || []).filter(v => v.status === "pending").length})` },
-          { id: "audit", label: "Security & Audit Logs" },
-        ].map((t) => (
+        {(
+          [
+            { id: "overview", label: "System Health & Games" },
+            { id: "verifications", label: `Athlete Verifications (${(verificationQueue || []).filter(v => v.status === "pending").length})` },
+            { id: "audit", label: "Security & Audit Logs" },
+          ] as const
+        ).map((t) => (
           <button
             key={t.id}
-            onClick={() => setActiveTab(t.id as any)}
+            onClick={() => setActiveTab(t.id)}
             className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase transition ${
               activeTab === t.id
                 ? "bg-rose-600 text-white"
